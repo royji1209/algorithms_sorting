@@ -15,7 +15,7 @@ def bubble_sort_trace(arr):
         "step": step_num,
         "description": "초기 배열 상태",
         "array": list(current_arr),
-        "comparing_indices": [],
+        "comparing": [],
         "swapped": False
     })
     
@@ -37,7 +37,7 @@ def bubble_sort_trace(arr):
                 "step": step_num,
                 "description": desc,
                 "array": list(current_arr),
-                "comparing_indices": [j, j + 1],
+                "comparing": [j, j + 1],
                 "swapped": swapped
             })
             
@@ -48,29 +48,34 @@ def bubble_sort_trace(arr):
         "step": step_num + 1,
         "description": "정렬 완료",
         "array": list(current_arr),
-        "comparing_indices": [],
+        "comparing": [],
         "swapped": False
     })
     
     return history, current_arr
 
-@app.route("/", methods=["POST"])
+@app.route("/", methods=["GET"])
+@app.route("/health", methods=["GET"])
+def health_check():
+    return jsonify({"status": "healthy"}), 200
+
+@app.route("/sort", methods=["POST"])
 def sort_handler():
     try:
-        data = request.get_json(silent=True)
-        if not data or "array" not in data:
-            return jsonify({"status": "error", "message": "'array' 키가 포함된 JSON이 필요합니다."}), 400
+        content = request.get_json(silent=True)
+        if not content:
+            return jsonify({"status": "error", "message": "JSON 데이터가 필요합니다."}), 400
         
-        input_array = data["array"]
-        if not isinstance(input_array, list):
-            return jsonify({"status": "error", "message": "'array'는 리스트 형태여야 합니다."}), 400
+        raw_list = content.get("numbers") or content.get("array")
+        if raw_list is None or not isinstance(raw_list, list):
+            return jsonify({"status": "error", "message": "'numbers' 키에 배열을 전달해야 합니다."}), 400
         
-        validated_array = [int(x) for x in input_array]
+        validated_array = [int(x) for x in raw_list]
         steps, sorted_array = bubble_sort_trace(validated_array)
         
         return jsonify({
             "status": "success",
-            "initial_array": validated_array,
+            "original": validated_array,
             "sorted_array": sorted_array,
             "total_steps": len(steps) - 1,
             "complexity": {
