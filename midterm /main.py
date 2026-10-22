@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -7,82 +8,76 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 
 
 class FixedQueue:
-    """
-    고정 길이 큐 (Ring Buffer 기반 Fixed-Size Queue) 클래스
-    서버 요구사항 10가지 기능을 모두 메서드로 구현
-    """
-    def __init__(self, capacity: int = 20):
-        # 1) 초기화 (Initialize)
-        self.capacity = capacity              # 큐의 최대 크기 (기본 20)
-        self.que = [None] * capacity          # 고정 길이 배열
-        self.front = 0                        # 맨 앞 원소 인덱스 (전면)
-        self.rear = 0                         # 맨 뒤 다음 원소가 들어갈 인덱스 (후면)
-        self.no = 0                           # 현재 큐에 쌓인 데이터 개수
+    """고정 길이 큐 (Ring Buffer 기반 Fixed-Size Queue)"""
+    def __init__(self, capacity=20):
+        # 1) 초기화
+        self.capacity = int(capacity)
+        self.que = [None] * self.capacity
+        self.front = 0
+        self.rear = 0
+        self.no = 0
 
     # 3) 현재 데이터 개수(길이/크기) 반환
-    def size(self) -> int:
+    def size(self):
         return self.no
 
-    # 4) 상태 검사 (empty, full)
-    def is_empty(self) -> bool:
+    # 4) 상태 검사 (full, empty)
+    def is_empty(self):
         return self.no <= 0
 
-    def is_full(self) -> bool:
+    def is_full(self):
         return self.no >= self.capacity
 
-    def get_status(self) -> dict:
+    def get_status(self):
+        state_str = "FULL (가득 참)" if self.is_full() else ("EMPTY (비어 있음)" if self.is_empty() else "NORMAL (여유 있음)")
         return {
             "is_empty": self.is_empty(),
             "is_full": self.is_full(),
-            "state_text": "FULL (가득 참)" if self.is_full() else ("EMPTY (비어 있음)" if self.is_empty() else "NORMAL (여유 있음)")
+            "state_text": state_str
         }
 
-    # 2) push (인큐 - 데이터 추가)
-    def push(self, value) -> dict:
+    # 2) push
+    def push(self, value):
         if self.is_full():
-            return {"success": False, "message": "Queue Overflow: 큐가 가득 차서 데이터를 추가할 수 없습니다."}
+            return {"success": False, "message": "Queue Overflow: 큐가 가득 찼습니다."}
         self.que[self.rear] = value
         self.rear = (self.rear + 1) % self.capacity
         self.no += 1
-        return {"success": True, "message": f"값 {value}을(를) Rear에 Push했습니다."}
+        return {"success": True, "message": f"값 {value}을(를) Push했습니다."}
 
-    # 2) pop (디큐 - 데이터 추출 및 삭제)
-    def pop(self) -> dict:
+    # 2) pop
+    def pop(self):
         if self.is_empty():
-            return {"success": False, "value": None, "message": "Queue Underflow: 큐가 비어 있어 데이터를 꺼낼 수 없습니다."}
+            return {"success": False, "value": None, "message": "Queue Underflow: 큐가 비어 있습니다."}
         val = self.que[self.front]
         self.que[self.front] = None
         self.front = (self.front + 1) % self.capacity
         self.no -= 1
         return {"success": True, "value": val, "message": f"Front에서 값 {val}을(를) Pop했습니다."}
 
-    # 5) 전면(Front) 데이터 확인 (Peek)
-    def peek(self) -> dict:
+    # 5) 전면(Front) 데이터 확인
+    def peek(self):
         if self.is_empty():
-            return {"success": False, "value": None, "message": "큐가 비어 있어 전면(Front) 데이터가 없습니다."}
+            return {"success": False, "value": None, "message": "큐가 비어 있습니다."}
         return {"success": True, "value": self.que[self.front], "front_index": self.front}
 
-    # 6) 큐 전체 데이터 삭제 (Clear)
+    # 6) 큐 전체 데이터 삭제
     def clear(self):
         self.que = [None] * self.capacity
         self.front = 0
         self.rear = 0
         self.no = 0
 
-    # 7) 값의 Index 검색 (Front부터 스캔하여 물리적 배열 인덱스 및 논리적 순서 반환)
-    def find_index(self, value) -> dict:
+    # 7) 값의 Index 검색
+    def find_index(self, value):
         for i in range(self.no):
             idx = (i + self.front) % self.capacity
             if self.que[idx] == value:
-                return {
-                    "found": True,
-                    "physical_index": idx,      # 배열 내 실제 인덱스
-                    "logical_order": i          # Front 기준 순서 (0부터 시작)
-                }
+                return {"found": True, "physical_index": idx, "logical_order": i}
         return {"found": False, "physical_index": -1, "logical_order": -1}
 
-    # 8) 특정 값의 개수 반환 (Count)
-    def count_value(self, value) -> int:
+    # 8) 값의 개수(길이/크기)
+    def count_value(self, value):
         cnt = 0
         for i in range(self.no):
             idx = (i + self.front) % self.capacity
@@ -90,20 +85,19 @@ class FixedQueue:
                 cnt += 1
         return cnt
 
-    # 9) 값의 존재 여부 검사 (Contains)
-    def contains(self, value) -> bool:
+    # 9) 값의 존재 여부 검사
+    def contains(self, value):
         return self.count_value(value) > 0
 
-    # 10) Front부터 Rear까지 데이터 순서대로 출력 (Dump)
-    def dump_front_to_rear(self) -> list:
+    # 10) Front부터 Rear까지 출력
+    def dump_front_to_rear(self):
         result = []
         for i in range(self.no):
             idx = (i + self.front) % self.capacity
             result.append(self.que[idx])
         return result
 
-    # 현재 큐의 전체 스냅샷 정보 반환
-    def snapshot(self) -> dict:
+    def snapshot(self):
         return {
             "capacity": self.capacity,
             "current_size": self.size(),
@@ -116,25 +110,17 @@ class FixedQueue:
         }
 
 
-# 전역 큐 인스턴스 생성 (기본 사이즈 20)
 GLOBAL_QUEUE = FixedQueue(capacity=20)
 
 
 @app.route('/queue', methods=['POST'])
 @app.route('/', methods=['POST'])
 def handle_queue():
-    """
-    클라이언트(GAS)로부터 명령(action)을 받아 고정 길이 큐 연산을 수행합니다.
-    Cloud Run의 무상태(Stateless) 환경에서도 항상 일관된 동작을 보장하기 위해
-    클라이언트가 전달한 현재 큐 상태(state)를 복원하여 연산하거나,
-    전체 과제 시나리오 일괄 실행(RUN_SCENARIO)을 지원합니다.
-    """
     global GLOBAL_QUEUE
     try:
-        data = request.get_json() or {}
+        data = request.get_json(silent=True) or {}
         action = data.get("action", "RUN_SCENARIO")
 
-        # 클라이언트가 상태를 함께 보내온 경우 복원 (단일 조작 지원)
         client_state = data.get("queue_state")
         if client_state and action != "INIT":
             q = FixedQueue(capacity=int(client_state.get("capacity", 20)))
@@ -145,9 +131,6 @@ def handle_queue():
         else:
             q = GLOBAL_QUEUE
 
-        # ------------------------------------------------------------------
-        # [시나리오 일괄 실행] 문제에 제시된 1)~8) 사용자 동작을 단계별로 모두 수행
-        # ------------------------------------------------------------------
         if action == "RUN_SCENARIO":
             capacity = int(data.get("capacity", 20))
             input_arr = data.get("array", [19, 15, 29, 25, 33, 35, 49, 42, 50, 55, 62, 66, 77, 80])
@@ -157,17 +140,17 @@ def handle_queue():
             q = FixedQueue(capacity=capacity)
             steps = []
 
-            # 동작 1) 큐의 사이즈는 20으로 초기화
+            # 1) 큐의 사이즈는 20임 (초기화)
             steps.append({
                 "step": 1,
                 "title": f"1) 큐 초기화 (사이즈 = {capacity})",
                 "action_type": "INIT",
                 "highlight_indices": [],
-                "result_text": f"크기 {capacity}인 고정 길이 큐(Fixed-Size Queue)를 생성하고 초기화했습니다.",
+                "result_text": f"크기 {capacity}인 고정 길이 큐를 생성하고 초기화했습니다.",
                 "snapshot": q.snapshot()
             })
 
-            # 동작 2) 주어진 배열 [19, 15, ..., 80]을 차례대로 Push
+            # 2) 위의 배열을 push하세요
             pushed_items = []
             for val in input_arr:
                 q.push(int(val))
@@ -182,7 +165,7 @@ def handle_queue():
                 "snapshot": q.snapshot()
             })
 
-            # 동작 3) 현재의 데이터 개수는?
+            # 3) 현재의 개수는?
             cur_size = q.size()
             steps.append({
                 "step": 3,
@@ -193,18 +176,18 @@ def handle_queue():
                 "snapshot": q.snapshot()
             })
 
-            # 동작 4) 현재 상태는? (Full / Empty 여부)
+            # 4) 현재 상태는?
             st = q.get_status()
             steps.append({
                 "step": 4,
                 "title": "4) 현재 상태 검사 (Full / Empty)",
                 "action_type": "STATUS",
                 "highlight_indices": [],
-                "result_text": f"Empty 여부: {st['is_empty']} | Full 여부: {st['is_full']} ➔ 상태: {st['state_text']} (여유 공간: {q.capacity - cur_size}칸)",
+                "result_text": f"Empty 여부: {st['is_empty']} | Full 여부: {st['is_full']} -> 상태: {st['state_text']} (여유 공간: {q.capacity - cur_size}칸)",
                 "snapshot": q.snapshot()
             })
 
-            # 동작 5) 전면(Front) 데이터 확인
+            # 5) 전면 데이터 확인
             pk = q.peek()
             steps.append({
                 "step": 5,
@@ -215,7 +198,7 @@ def handle_queue():
                 "snapshot": q.snapshot()
             })
 
-            # 동작 6) 42 값의 위치(Index)와 개수는?
+            # 6) 42 값의 위치와 개수는?
             find_42 = q.find_index(target_search)
             cnt_42 = q.count_value(target_search)
             hi_42 = [find_42["physical_index"]] if find_42["found"] else []
@@ -232,7 +215,7 @@ def handle_queue():
                 "snapshot": q.snapshot()
             })
 
-            # 동작 7) 88 값의 존재 여부는?
+            # 7) 88 값의 존재 여부는?
             exist_88 = q.contains(target_exist)
             find_88 = q.find_index(target_exist)
             hi_88 = [find_88["physical_index"]] if exist_88 else []
@@ -245,14 +228,14 @@ def handle_queue():
                 "snapshot": q.snapshot()
             })
 
-            # 동작 8) 배열 전체를 출력 (Front부터 Rear까지)
+            # 8) 배열 전체를 출력
             all_elements = q.dump_front_to_rear()
             steps.append({
                 "step": 8,
                 "title": "8) Front부터 Rear까지 배열 전체 출력",
                 "action_type": "DUMP",
                 "highlight_indices": [(i + q.front) % q.capacity for i in range(q.no)],
-                "result_text": f"Front({q.front}) ➔ Rear({q.rear}) 전체 데이터 출력: {all_elements}",
+                "result_text": f"Front({q.front}) -> Rear({q.rear}) 전체 데이터 출력: {all_elements}",
                 "snapshot": q.snapshot()
             })
 
@@ -264,9 +247,6 @@ def handle_queue():
                 "final_snapshot": q.snapshot()
             }), 200
 
-        # ------------------------------------------------------------------
-        # [개별 기능 수행] 사용자가 웹 UI에서 개별 버튼을 눌렀을 때 처리
-        # ------------------------------------------------------------------
         elif action == "INIT":
             cap = int(data.get("capacity", 20))
             q = FixedQueue(capacity=cap)
@@ -301,7 +281,7 @@ def handle_queue():
 
         elif action == "STATUS":
             st = q.get_status()
-            msg = f"상태 검사 ➔ Empty: {st['is_empty']}, Full: {st['is_full']} ({st['state_text']})"
+            msg = f"상태 검사 -> Empty: {st['is_empty']}, Full: {st['is_full']} ({st['state_text']})"
             highlight = []
 
         elif action == "CLEAR":
@@ -313,12 +293,11 @@ def handle_queue():
             val = int(data.get("value", 42))
             idx_info = q.find_index(val)
             cnt = q.count_value(val)
-            exists = q.contains(val)
             if idx_info["found"]:
-                msg = f"값 [{val}] 검색 결과 ➔ 존재 여부: True | 위치(Index): {idx_info['physical_index']} | 개수: {cnt}개"
+                msg = f"값 [{val}] 검색 결과 -> 존재 여부: True | 위치(Index): {idx_info['physical_index']} | 개수: {cnt}개"
                 highlight = [idx_info["physical_index"]]
             else:
-                msg = f"값 [{val}] 검색 결과 ➔ 존재 여부: False | 위치(Index): 없음(-1) | 개수: 0개"
+                msg = f"값 [{val}] 검색 결과 -> 존재 여부: False | 위치(Index): 없음(-1) | 개수: 0개"
                 highlight = []
 
         elif action == "DUMP":
@@ -327,7 +306,7 @@ def handle_queue():
             highlight = [(i + q.front) % q.capacity for i in range(q.no)]
 
         else:
-            return jsonify({"status": "error", "message": f"알 수 없는 명령입니다: {action}"}), 400
+            return jsonify({"status": "error", "message": f"알 수 없는 명령: {action}"}), 400
 
         GLOBAL_QUEUE = q
         return jsonify({
@@ -343,9 +322,10 @@ def handle_queue():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
+@app.route('/', methods=['GET'])
 @app.route('/health', methods=['GET'])
 def health():
-    return jsonify({"status": "healthy"}), 200
+    return jsonify({"status": "healthy", "service": "Fixed-Size Queue Server"}), 200
 
 
 if __name__ == "__main__":
