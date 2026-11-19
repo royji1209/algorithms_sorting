@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="ko" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AlgoMaze Lab | BFS vs DFS 미로 탈출 알고리즘 시각화 & 비교</title>
+  <!-- Google Fonts & Tailwind CDN & Chart.js -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ["Inter", "sans-serif"],
+            mono: ["JetBrains Mono", "monospace"]
+          },
+          colors: {
+            bgDark: "#0b1326",
+            cardDark: "#131b2e",
+            cardBorder: "#222a3d",
+            cyanAccent: "#38bdf8",
+            emeraldAccent: "#4edea3",
+            amberAccent: "#ffc174",
+            roseAccent: "#f43f5e"
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body { background-color: #0b1326; color: #dae2fd; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0b1326; }
+    ::-webkit-scrollbar-thumb { background: #222a3d; border-radius: 3px; }
+    .cell-glow-bfs { box-shadow: 0 0 8px rgba(56, 189, 248, 0.4); }
+    .cell-glow-dfs { box-shadow: 0 0 8px rgba(255, 193, 116, 0.4); }
+  </style>
+</head>
+<body class="font-sans antialiased min-h-screen flex flex-col">
+
+  <!-- 상단 네비게이션 헤더 -->
+  <header class="h-14 border-b border-cardBorder bg-[#060e20]/90 backdrop-blur-md px-6 flex items-center justify-between sticky top-0 z-50">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg bg-cardBorder flex items-center justify-center text-cyanAccent">
+        <span class="material-symbols-outlined text-[20px]">hub</span>
+      </div>
+      <div>
+        <h1 class="font-bold text-sm tracking-tight text-white flex items-center gap-2">
+          AlgoMaze Lab <span class="text-xs px-2 py-0.5 rounded-full bg-cyanAccent/10 text-cyanAccent border border-cyanAccent/20">BFS vs DFS</span>
+        </h1>
+        <p class="text-[10px] text-slate-400 font-mono">Queue(FIFO) vs Stack(LIFO) 탐색 경로 & 히스토그램 벤치마크</p>
+      </div>
+    </div>
+
+    <!-- 연결 상태 및 복잡도 인디케이터 -->
+    <div class="flex items-center gap-4 text-xs font-mono">
+      <div class="flex items-center gap-2 bg-cardDark px-3 py-1.5 rounded-full border border-cardBorder">
+        <span class="relative flex h-2 w-2">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emeraldAccent opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-emeraldAccent"></span>
+        </span>
+        <span class="text-slate-300">FastAPI Engine: Active</span>
+      </div>
+      <div class="hidden md:flex items-center gap-2 text-slate-400">
+        <span>시간복잡도: <strong class="text-cyanAccent">O(V + E)</strong></span>
+      </div>
+    </div>
+  </header>
+
+  <!-- 메인 제어 바 (Control Toolbar) -->
+  <section class="border-b border-cardBorder bg-cardDark/60 px-6 py-3 flex flex-wrap items-center justify-between gap-4">
+    <div class="flex items-center gap-2">
+      <!-- 실행 / 일시정지 -->
+      <button id="btn-play-pause" class="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-cyanAccent text-slate-950 font-semibold text-xs hover:bg-cyan-300 transition-all shadow-[0_0_12px_rgba(56,189,248,0.25)]">
+        <span class="material-symbols-outlined text-[16px]">play_arrow</span>
+        <span id="txt-play-pause">동시 실행</span>
+      </button>
+
+      <!-- 단일 스텝 전진 -->
+      <button id="btn-step" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cardBorder text-slate-200 text-xs hover:bg-slate-700 transition-all">
+        <span class="material-symbols-outlined text-[16px]">step_over</span>
+        <span>스텝 전진</span>
+      </button>
+
+      <!-- 리셋 -->
+      <button id="btn-reset" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cardBorder text-slate-200 text-xs hover:bg-slate-700 transition-all">
+        <span class="material-symbols-outlined text-[16px]">restart_alt</span>
+        <span>초기화</span>
+      </button>
+
+      <!-- 미로 새로 생성 -->
+      <button id="btn-regenerate" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cardBorder text-slate-200 text-xs hover:bg-slate-700 transition-all">
+        <span class="material-symbols-outlined text-[16px]">shuffle</span>
+        <span>미로 재생성</span>
+      </button>
+    </div>
+
+    <!-- 미로 크기 및 속도 조절 -->
+    <div class="flex items-center gap-6 text-xs font-mono">
+      <div class="flex items-center gap-2">
+        <span class="text-slate-400">격자 크기:</span>
+        <select id="sel-size" class="bg-cardDark border border-cardBorder rounded px-2 py-1 text-slate-200 focus:outline-none focus:border-cyanAccent">
+          <option value="11">11 x 11 (소형)</option>
+          <option value="15" selected>15 x 15 (표준)</option>
+          <option value="21">21 x 21 (대형)</option>
+        </select>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <span class="text-slate-400">속도:</span>
+        <input id="slider-speed" type="range" min="1" max="10" value="5" class="w-24 accent-cyanAccent cursor-pointer" />
+        <span id="txt-speed" class="text-cyanAccent w-8">5x</span>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <span class="text-slate-400">현재 스텝:</span>
+        <span id="txt-step-counter" class="text-white font-bold bg-cardBorder px-2.5 py-0.5 rounded">0</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 대시보드 메인 본문 (Dual Viewport & Histograms) -->
+  <main class="flex-1 p-6 flex flex-col gap-6 max-w-7xl mx-auto w-full">
+
+    <!-- 상단: 듀얼 미로 뷰포트 (좌: BFS vs 우: DFS) -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+      <!-- BFS 미로 카드 -->
+      <div class="bg-cardDark border border-cardBorder rounded-xl p-5 flex flex-col gap-4 shadow-lg">
+        <div class="flex items-center justify-between border-b border-cardBorder pb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-cyanAccent"></span>
+            <h2 class="font-bold text-sm text-white">너비 우선 탐색 (BFS)</h2>
+            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-cyanAccent/10 text-cyanAccent">Queue (FIFO)</span>
+          </div>
+          <span id="bfs-status-badge" class="text-xs font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300">대기 중</span>
+        </div>
+
+        <!-- 미로 캔버스 -->
+        <div class="flex justify-center items-center bg-[#060e20] p-3 rounded-lg border border-cardBorder relative">
+          <canvas id="canvas-bfs" width="360" height="360" class="rounded"></canvas>
+          <div id="bfs-overlay-result" class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm rounded flex flex-col items-center justify-center gap-2 hidden">
+            <span class="material-symbols-outlined text-cyanAccent text-4xl">check_circle</span>
+            <span class="text-white font-bold text-sm">최단 경로 탐색 완료!</span>
+            <span id="bfs-result-meta" class="text-xs text-slate-300 font-mono"></span>
+          </div>
+        </div>
+
+        <!-- BFS 실시간 메타데이터 & 큐 상태 -->
+        <div class="grid grid-cols-3 gap-2 text-xs font-mono">
+          <div class="bg-cardBorder/40 p-2.5 rounded border border-cardBorder">
+            <span class="text-slate-400 block text-[10px]">방문 노드 수 (Visited)</span>
+            <strong id="bfs-visited-val" class="text-cyanAccent text-sm">0</strong>
+          </div>
+          <div class="bg-cardBorder/40 p-2.5 rounded border border-cardBorder">
+            <span class="text-slate-400 block text-[10px]">Queue 대기 크기</span>
+            <strong id="bfs-queue-val" class="text-emeraldAccent text-sm">0</strong>
+          </div>
+          <div class="bg-cardBorder/40 p-2.5 rounded border border-cardBorder">
+            <span class="text-slate-400 block text-[10px]">최단 경로 길이</span>
+            <strong id="bfs-path-val" class="text-white text-sm">-</strong>
+          </div>
+        </div>
+
+        <!-- 큐 스냅샷 미리보기 -->
+        <div class="bg-[#060e20] p-2.5 rounded text-[11px] font-mono border border-cardBorder/70">
+          <span class="text-slate-400 block mb-1 text-[10px]">현재 FIFO Queue Front:</span>
+          <div id="bfs-queue-preview" class="text-slate-300 truncate">대기 중...</div>
+        </div>
+      </div>
+
+      <!-- DFS 미로 카드 -->
+      <div class="bg-cardDark border border-cardBorder rounded-xl p-5 flex flex-col gap-4 shadow-lg">
+        <div class="flex items-center justify-between border-b border-cardBorder pb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-amberAccent"></span>
+            <h2 class="font-bold text-sm text-white">깊이 우선 탐색 (DFS)</h2>
+            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-amberAccent/10 text-amberAccent">Stack (LIFO)</span>
+          </div>
+          <span id="dfs-status-badge" class="text-xs font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300">대기 중</span>
+        </div>
+
+        <!-- 미로 캔버스 -->
+        <div class="flex justify-center items-center bg-[#060e20] p-3 rounded-lg border border-cardBorder relative">
+          <canvas id="canvas-dfs" width="360" height="360" class="rounded"></canvas>
+          <div id="dfs-overlay-result" class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm rounded flex flex-col items-center justify-center gap-2 hidden">
+            <span class="material-symbols-outlined text-amberAccent text-4xl">flag</span>
+            <span class="text-white font-bold text-sm">경로 탐색 완료 (우회 가능)</span>
+            <span id="dfs-result-meta" class="text-xs text-slate-300 font-mono"></span>
+          </div>
+        </div>
+
+        <!-- DFS 실시간 메타데이터 & 스택 상태 -->
+        <div class="grid grid-cols-3 gap-2 text-xs font-mono">
+          <div class="bg-cardBorder/40 p-2.5 rounded border border-cardBorder">
+            <span class="text-slate-400 block text-[10px]">방문 노드 수 (Visited)</span>
+            <strong id="dfs-visited-val" class="text-amberAccent text-sm">0</strong>
+          </div>
+          <div class="bg-cardBorder/40 p-2.5 rounded border border-cardBorder">
+            <span class="text-slate-400 block text-[10px]">Stack 깊이 (Call Depth)</span>
+            <strong id="dfs-stack-val" class="text-roseAccent text-sm">0</strong>
+          </div>
+          <div class="bg-cardBorder/40 p-2.5 rounded border border-cardBorder">
+            <span class="text-slate-400 block text-[10px]">발견된 경로 길이</span>
+            <strong id="dfs-path-val" class="text-white text-sm">-</strong>
+          </div>
+        </div>
+
+        <!-- 스택 스냅샷 미리보기 -->
+        <div class="bg-[#060e20] p-2.5 rounded text-[11px] font-mono border border-cardBorder/70">
+          <span class="text-slate-400 block mb-1 text-[10px]">현재 LIFO Stack Top:</span>
+          <div id="dfs-stack-preview" class="text-slate-300 truncate">대기 중...</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 하단: 실시간 단계별 히스토그램 & 알고리즘 비교 매트릭스 -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      <!-- 1. 탐색 깊이별 노드 분포 히스토그램 (Depth Histogram) -->
+      <div class="bg-cardDark border border-cardBorder rounded-xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <h3 class="font-bold text-xs text-slate-200 flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px] text-cyanAccent">bar_chart</span>
+            탐색 깊이(Level)별 히스토그램
+          </h3>
+          <span class="text-[10px] font-mono text-slate-400">BFS(동심원) vs DFS(선형)</span>
+        </div>
+        <div class="h-44 w-full">
+          <canvas id="chart-depth-hist"></canvas>
+        </div>
+        <p class="text-[10px] text-slate-400 font-mono">
+          BFS는 특정 깊이에 다수의 노드가 모이는 종형 분포를, DFS는 좁고 깊게 퍼지는 분포를 형성합니다.
+        </p>
+      </div>
+
+      <!-- 2. Queue vs Stack 실시간 크기 추이 (Frontier Size Trend) -->
+      <div class="bg-cardDark border border-cardBorder rounded-xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <h3 class="font-bold text-xs text-slate-200 flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px] text-emeraldAccent">trending_up</span>
+            Queue vs Stack 메모리 추이
+          </h3>
+          <span class="text-[10px] font-mono text-slate-400">Frontier Nodes</span>
+        </div>
+        <div class="h-44 w-full">
+          <canvas id="chart-frontier-trend"></canvas>
+        </div>
+        <p class="text-[10px] text-slate-400 font-mono">
+          BFS는 층별 탐색으로 큐 크기가 증가(O(V))하며, DFS는 경로 분기점만큼만 스택(O(H))을 점유합니다.
+        </p>
+      </div>
+
+      <!-- 3. 종합 알고리즘 비교 매트릭스 (Comparison Table) -->
+      <div class="bg-cardDark border border-cardBorder rounded-xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <h3 class="font-bold text-xs text-slate-200 flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px] text-amberAccent">compare_arrows</span>
+            작동 원리 및 복잡도 비교
+          </h3>
+          <span class="text-[10px] font-mono text-emeraldAccent">Summary</span>
+        </div>
+
+        <div class="overflow-x-auto text-xs font-mono">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b border-cardBorder text-[11px] text-slate-400">
+                <th class="py-1.5">항목</th>
+                <th class="py-1.5 text-cyanAccent">BFS (너비)</th>
+                <th class="py-1.5 text-amberAccent">DFS (깊이)</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-cardBorder/40 text-[11px] text-slate-300">
+              <tr>
+                <td class="py-1.5 text-slate-400">자료구조</td>
+                <td>Queue (FIFO)</td>
+                <td>Stack (LIFO)</td>
+              </tr>
+              <tr>
+                <td class="py-1.5 text-slate-400">최단 경로</td>
+                <td class="text-emeraldAccent font-semibold">100% 보장</td>
+                <td class="text-roseAccent">미보장 (우회)</td>
+              </tr>
+              <tr>
+                <td class="py-1.5 text-slate-400">시간 복잡도</td>
+                <td>O(V + E)</td>
+                <td>O(V + E)</td>
+              </tr>
+              <tr>
+                <td class="py-1.5 text-slate-400">공간 복잡도</td>
+                <td>O(V)</td>
+                <td>O(H) ~ O(V)</td>
+              </tr>
+              <tr>
+                <td class="py-1.5 text-slate-400">탐색 패턴</td>
+                <td>동심원 레벨별</td>
+                <td>막다른 길 백트래킹</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div id="comparison-analysis-box" class="bg-[#060e20] p-2.5 rounded text-[11px] text-slate-300 font-mono mt-auto border border-cardBorder">
+          시뮬레이션을 실행하면 두 알고리즘의 방문 노드 수와 경로 길이 비교 결과가 출력됩니다.
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- 프론트엔드 인터랙티브 시뮬레이터 스크립트 -->
+  <script>
+    // 전역 상태 변수
+    let currentMaze = null;
+    let bfsResult = null;
+    let dfsResult = null;
+    let currentStep = 0;
+    let maxStep = 0;
+    let isPlaying = false;
+    let playInterval = null;
+    let playSpeed = 5;
+
+    // 차트 인스턴스
+    let depthChart = null;
+    let frontierChart = null;
+
+    // 초기화
+    window.addEventListener('DOMContentLoaded', async () => {
+      initCharts();
+      setupEventListeners();
+      await loadDefaultBenchmark();
+    });
+
+    function setupEventListeners() {
+      document.getElementById('btn-play-pause').addEventListener('click', togglePlayPause);
+      document.getElementById('btn-step').addEventListener('click', stepForward);
+      document.getElementById('btn-reset').addEventListener('click', resetSimulation);
+      document.getElementById('btn-regenerate').addEventListener('click', async () => {
+        const size = parseInt(document.getElementById('sel-size').value, 10);
+        await requestGenerateMaze(size, size);
+      });
+      document.getElementById('sel-size').addEventListener('change', async (e) => {
+        const size = parseInt(e.target.value, 10);
+        await requestGenerateMaze(size, size);
+      });
+      document.getElementById('slider-speed').addEventListener('input', (e) => {
+        playSpeed = parseInt(e.target.value, 10);
+        document.getElementById('txt-speed').textContent = `${playSpeed}x`;
+        if (isPlaying) {
+          clearInterval(playInterval);
+          playInterval = setInterval(stepForward, Math.max(20, 300 / playSpeed));
+        }
+      });
+    }
+
+    // 기본 벤치마크 데이터 로드
+    async function loadDefaultBenchmark() {
+      try {
+        const res = await fetch('/api/benchmark/default');
+        if (!res.ok) throw new Error('API 호출 실패');
+        const data = await res.json();
+        applySimulationData(data.grid, data.start, data.goal, data.bfs, data.dfs);
+      } catch (err) {
+        console.error('기본 벤치마크 로드 실패:', err);
+      }
+    }
+
+    // 미로 새로 생성 요청
+    async function requestGenerateMaze(rows, cols) {
+      resetSimulation();
+      try {
+        const genRes = await fetch('/api/maze/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ rows, cols, loop_ratio: 0.15 })
+        });
+        const genData = await genRes.json();
+
+        // 생성된 미로 풀이 요청
+        const solveRes = await fetch('/api/maze/solve', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            grid: genData.grid,
+            start: genData.start,
+            goal: genData.goal,
+            algorithm: 'both'
+          })
+        });
+        const solveData = await solveRes.json();
+        applySimulationData(genData.grid, genData.start, genData.goal, solveData.bfs, solveData.dfs);
+      } catch (err) {
+        console.error('미로 생성 및 풀이 실패:', err);
+      }
+    }
+
+    function applySimulationData(grid, start, goal, bfs, dfs) {
+      currentMaze = { grid, start, goal, rows: grid.length, cols: grid[0].length };
+      bfsResult = bfs;
+      dfsResult = dfs;
+      maxStep = Math.max(bfs.steps.length, dfs.steps.length);
+      currentStep = 0;
+
+      // 종합 비교 박스 업데이트
+      const pathDiff = dfs.path_length - bfs.path_length;
+      const visitDiff = dfs.total_visited - bfs.total_visited;
+      document.getElementById('comparison-analysis-box').innerHTML = 
+        `💡 <strong>비교 결과:</strong><br/>` +
+        `• BFS 최단경로 길이: <strong class="text-cyanAccent">${bfs.path_length}</strong> (방문: ${bfs.total_visited}개)<br/>` +
+        `• DFS 탐색경로 길이: <strong class="text-amberAccent">${dfs.path_length}</strong> (방문: ${dfs.total_visited}개)<br/>` +
+        `• 차이: DFS가 <strong>${Math.abs(pathDiff)}보</strong> ` + (pathDiff >= 0 ? '더 우회함' : '더 짧음') + 
+        `, 노드는 <strong>${Math.abs(visitDiff)}개</strong> ` + (visitDiff >= 0 ? '더 많이 탐색함' : '더 적게 탐색함');
+
+      renderStep(0);
+    }
+
+    function togglePlayPause() {
+      if (isPlaying) {
+        pauseSimulation();
+      } else {
+        playSimulation();
+      }
+    }
+
+    function playSimulation() {
+      if (currentStep >= maxStep) currentStep = 0;
+      isPlaying = true;
+      document.getElementById('txt-play-pause').textContent = '일시 정지';
+      document.getElementById('btn-play-pause').classList.replace('bg-cyanAccent', 'bg-roseAccent');
+      playInterval = setInterval(stepForward, Math.max(20, 300 / playSpeed));
+    }
+
+    function pauseSimulation() {
+      isPlaying = false;
+      clearInterval(playInterval);
+      document.getElementById('txt-play-pause').textContent = '동시 실행';
+      document.getElementById('btn-play-pause').classList.replace('bg-roseAccent', 'bg-cyanAccent');
+    }
+
+    function stepForward() {
+      if (currentStep < maxStep - 1) {
+        currentStep++;
+        renderStep(currentStep);
+      } else {
+        pauseSimulation();
+      }
+    }
+
+    function resetSimulation() {
+      pauseSimulation();
+      currentStep = 0;
+      renderStep(0);
+    }
+
+    // 단계별 렌더링 함수
+    function renderStep(step) {
+      document.getElementById('txt-step-counter').textContent = step;
+
+      const bfsStep = bfsResult ? bfsResult.steps[Math.min(step, bfsResult.steps.length - 1)] : null;
+      const dfsStep = dfsResult ? dfsResult.steps[Math.min(step, dfsResult.steps.length - 1)] : null;
+
+      if (currentMaze) {
+        drawMaze('canvas-bfs', currentMaze, bfsStep, bfsResult ? bfsResult.final_path : [], '#38bdf8', '#0284c7');
+        drawMaze('canvas-dfs', currentMaze, dfsStep, dfsResult ? dfsResult.final_path : [], '#ffc174', '#d97706');
+      }
+
+      // 메타데이터 업데이트
+      if (bfsStep) {
+        document.getElementById('bfs-visited-val').textContent = bfsStep.visited_count;
+        document.getElementById('bfs-queue-val').textContent = bfsStep.frontier_count;
+        document.getElementById('bfs-queue-preview').textContent = 
+          bfsStep.frontier.length > 0 ? bfsStep.frontier.slice(0, 5).map(p => `[${p[0]},${p[1]}]`).join(' → ') : '(Queue 비어있음)';
+        if (bfsStep.path_found) {
+          document.getElementById('bfs-path-val').textContent = bfsResult.path_length;
+          document.getElementById('bfs-status-badge').textContent = '도착 완료 (최단)';
+          document.getElementById('bfs-status-badge').className = 'text-xs font-mono px-2 py-0.5 rounded bg-cyanAccent/20 text-cyanAccent';
+          document.getElementById('bfs-overlay-result').classList.remove('hidden');
+          document.getElementById('bfs-result-meta').textContent = `경로 길이: ${bfsResult.path_length} | 스텝: ${bfsStep.step} | 시간: ${bfsStep.metadata.step_time_ms}ms`;
+        } else {
+          document.getElementById('bfs-path-val').textContent = '-';
+          document.getElementById('bfs-status-badge').textContent = '탐색 중...';
+          document.getElementById('bfs-status-badge').className = 'text-xs font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300';
+          document.getElementById('bfs-overlay-result').classList.add('hidden');
+        }
+      }
+
+      if (dfsStep) {
+        document.getElementById('dfs-visited-val').textContent = dfsStep.visited_count;
+        document.getElementById('dfs-stack-val').textContent = dfsStep.frontier_count;
+        document.getElementById('dfs-stack-preview').textContent = 
+          dfsStep.frontier.length > 0 ? dfsStep.frontier.slice(-5).map(p => `[${p[0]},${p[1]}]`).join(' ← Top ') : '(Stack 비어있음)';
+        if (dfsStep.path_found) {
+          document.getElementById('dfs-path-val').textContent = dfsResult.path_length;
+          document.getElementById('dfs-status-badge').textContent = '도착 완료';
+          document.getElementById('dfs-status-badge').className = 'text-xs font-mono px-2 py-0.5 rounded bg-amberAccent/20 text-amberAccent';
+          document.getElementById('dfs-overlay-result').classList.remove('hidden');
+          document.getElementById('dfs-result-meta').textContent = `경로 길이: ${dfsResult.path_length} | 스텝: ${dfsStep.step} | 시간: ${dfsStep.metadata.step_time_ms}ms`;
+        } else {
+          document.getElementById('dfs-path-val').textContent = '-';
+          document.getElementById('dfs-status-badge').textContent = '탐색 중...';
+          document.getElementById('dfs-status-badge').className = 'text-xs font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300';
+          document.getElementById('dfs-overlay-result').classList.add('hidden');
+        }
+      }
+
+      // 히스토그램 차트 갱신
+      updateCharts(bfsStep, dfsStep);
+    }
+
+    // 미로 캔버스 그리기 함수
+    function drawMaze(canvasId, maze, stepData, finalPath, activeColor, visitedColor) {
+      const canvas = document.getElementById(canvasId);
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const rows = maze.rows;
+      const cols = maze.cols;
+      const cellW = canvas.width / cols;
+      const cellH = canvas.height / rows;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // 1. 벽 및 길 그리기
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          if (maze.grid[r][c] === 1) {
+            ctx.fillStyle = '#1e293b'; // 벽
+          } else {
+            ctx.fillStyle = '#0f172a'; // 빈 통로
+          }
+          ctx.fillRect(c * cellW, r * cellH, cellW, cellH);
+          ctx.strokeStyle = '#060e20';
+          ctx.lineWidth = 0.5;
+          ctx.strokeRect(c * cellW, r * cellH, cellW, cellH);
+        }
+      }
+
+      // 2. 방문 완료 노드 (Visited)
+      if (stepData && stepData.visited) {
+        ctx.fillStyle = visitedColor;
+        ctx.globalAlpha = 0.65;
+        for (const [vr, vc] of stepData.visited) {
+          ctx.fillRect(vc * cellW, vr * cellH, cellW, cellH);
+        }
+        ctx.globalAlpha = 1.0;
+      }
+
+      // 3. 대기열 노드 (Queue/Stack Frontier)
+      if (stepData && stepData.frontier) {
+        ctx.fillStyle = activeColor;
+        for (const [fr, fc] of stepData.frontier) {
+          ctx.fillRect(fc * cellW + cellW * 0.15, fr * cellH + cellH * 0.15, cellW * 0.7, cellH * 0.7);
+        }
+      }
+
+      // 4. 도착 완료 시 최종 경로 하이라이트
+      if (stepData && stepData.path_found && finalPath.length > 0) {
+        ctx.strokeStyle = '#4edea3';
+        ctx.lineWidth = Math.max(3, cellW * 0.4);
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.beginPath();
+        for (let i = 0; i < finalPath.length; i++) {
+          const [pr, pc] = finalPath[i];
+          const px = pc * cellW + cellW / 2;
+          const py = pr * cellH + cellH / 2;
+          if (i === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.stroke();
+      }
+
+      // 5. 현재 활성 노드 (Current)
+      if (stepData && stepData.current) {
+        const [cr, cc] = stepData.current;
+        ctx.fillStyle = '#f43f5e';
+        ctx.beginPath();
+        ctx.arc(cc * cellW + cellW / 2, cr * cellH + cellH / 2, Math.min(cellW, cellH) * 0.35, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // 6. 시작점 (S) 및 도착점 (G)
+      drawMarker(ctx, maze.start[1] * cellW + cellW / 2, maze.start[0] * cellH + cellH / 2, '#4edea3', 'S', cellW);
+      drawMarker(ctx, maze.goal[1] * cellW + cellW / 2, maze.goal[0] * cellH + cellH / 2, '#f59e0b', 'G', cellW);
+    }
+
+    function drawMarker(ctx, x, y, color, label, size) {
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(x, y, size * 0.35, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#060e20';
+      ctx.font = `bold ${Math.max(9, size * 0.4)}px Inter, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(label, x, y);
+    }
+
+    // Chart.js 초기화
+    function initCharts() {
+      // 1. 깊이별 히스토그램 차트
+      const ctxDepth = document.getElementById('chart-depth-hist').getContext('2d');
+      depthChart = new Chart(ctxDepth, {
+        type: 'bar',
+        data: {
+          labels: ['0~2', '3~5', '6~8', '9~11', '12~14', '15+'],
+          datasets: [
+            { label: 'BFS (너비)', data: [1, 4, 8, 12, 10, 5], backgroundColor: 'rgba(56, 189, 248, 0.7)' },
+            { label: 'DFS (깊이)', data: [1, 2, 3, 2, 4, 8], backgroundColor: 'rgba(255, 193, 116, 0.7)' }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { ticks: { color: '#87929a', font: { size: 9, family: 'JetBrains Mono' } }, grid: { display: false } },
+            y: { ticks: { color: '#87929a', font: { size: 9, family: 'JetBrains Mono' } }, grid: { color: '#171f33' } }
+          },
+          plugins: {
+            legend: { labels: { color: '#dae2fd', font: { size: 10, family: 'Inter' } } }
+          }
+        }
+      });
+
+      // 2. Queue vs Stack 메모리 추이 차트
+      const ctxFrontier = document.getElementById('chart-frontier-trend').getContext('2d');
+      frontierChart = new Chart(ctxFrontier, {
+        type: 'line',
+        data: {
+          labels: Array.from({ length: 15 }, (_, i) => `${i * 2}`),
+          datasets: [
+            { label: 'Queue 크기 (BFS)', data: [1, 3, 6, 8, 10, 8, 6, 4, 2], borderColor: '#38bdf8', tension: 0.3, fill: false },
+            { label: 'Stack 크기 (DFS)', data: [1, 2, 4, 5, 4, 7, 6, 8, 9], borderColor: '#ffc174', tension: 0.3, fill: false }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { ticks: { color: '#87929a', font: { size: 9, family: 'JetBrains Mono' } }, grid: { display: false } },
+            y: { ticks: { color: '#87929a', font: { size: 9, family: 'JetBrains Mono' } }, grid: { color: '#171f33' } }
+          },
+          plugins: {
+            legend: { labels: { color: '#dae2fd', font: { size: 10, family: 'Inter' } } }
+          }
+        }
+      });
+    }
+
+    // 단계별 히스토그램 차트 실시간 갱신
+    function updateCharts(bfsStep, dfsStep) {
+      if (!depthChart || !frontierChart) return;
+
+      if (bfsStep && dfsStep && bfsStep.histogram && dfsStep.histogram) {
+        const bfsHist = bfsStep.histogram.depth_distribution || {};
+        const dfsHist = dfsStep.histogram.depth_distribution || {};
+
+        const allKeys = Array.from(new Set([...Object.keys(bfsHist), ...Object.keys(dfsHist)])).sort((a, b) => {
+          return parseInt(a) - parseInt(b);
+        });
+
+        depthChart.data.labels = allKeys.slice(0, 8);
+        depthChart.data.datasets[0].data = allKeys.slice(0, 8).map(k => bfsHist[k] || 0);
+        depthChart.data.datasets[1].data = allKeys.slice(0, 8).map(k => dfsHist[k] || 0);
+        depthChart.update('none');
+
+        // Frontier 크기 실시간 추가
+        if (frontierChart.data.labels.length > 25) {
+          frontierChart.data.labels.shift();
+          frontierChart.data.datasets[0].data.shift();
+          frontierChart.data.datasets[1].data.shift();
+        }
+        frontierChart.data.labels.push(`${currentStep}`);
+        frontierChart.data.datasets[0].data.push(bfsStep.frontier_count);
+        frontierChart.data.datasets[1].data.push(dfsStep.frontier_count);
+        frontierChart.update('none');
+      }
+    }
+  </script>
+</body>
+</html>
