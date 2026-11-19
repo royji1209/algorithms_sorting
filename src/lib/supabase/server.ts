@@ -22,7 +22,7 @@ export async function createSupabaseServerClient() {
             cookieStore.set(name, value, options)
           );
         } catch {
-          // Server Component에서 호출된 경우 무시
+          // Server Component에서 호출된 경우 무시 (미들웨어에서 세션 갱신 처리)
         }
       },
     },

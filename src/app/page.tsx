@@ -32,23 +32,29 @@ const CURRENT_USER_ID = "user-me";
 const CURRENT_USER_PEN_NAME = "달무리 서재";
 
 export default function MarginMailboxHomePage() {
+  // 첫 방문 시 1회 노출되는 입실 환영 서신(page_12.html) 표시 여부
   const [showWelcomeRitual, setShowWelcomeRitual] = useState<boolean>(true);
   const [activeTab, setActiveTab] = useState<MainNavTab>("mailbox");
+
+  // 사용자 이메일 및 관리자 권한 테스트용 상태
   const [currentEmail, setCurrentEmail] = useState<string>(
     "admin@marginmailbox.kr"
   );
   const [adminDeniedNotice, setAdminDeniedNotice] = useState<boolean>(false);
 
+  // 오늘의 편지함 & 감정 체크인 상태
   const [emotionInput, setEmotionInput] = useState<string>("");
   const [isCheckingIn, setIsCheckingIn] = useState<boolean>(false);
   const [checkinResult, setCheckinResult] =
     useState<EmotionCheckinResult | null>(null);
   const [selectedDayOfWeek, setSelectedDayOfWeek] = useState<number>(3);
 
+  // 전체 게시글(시드 + 사용자 작성) 및 댓글 상태
   const [posts, setPosts] = useState<PoemPost[]>(INITIAL_SEED_POSTS);
   const [comments, setComments] =
     useState<EmpathyComment[]>(INITIAL_SEED_COMMENTS);
 
+  // 밤하늘 우체국 연동 상태 (내가 띄운 온기 쪽지 & 관리자 심야 개장 토글)
   const [userWarmthNote, setUserWarmthNote] = useState<string>(
     "마음에 닿아 기쁩니다. 바람이 차가워지는 밤, 당신의 방 안은 온기로 가득하길 바랍니다."
   );
@@ -56,6 +62,7 @@ export default function MarginMailboxHomePage() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
+      // 첫 방문 여부 확인 (첫 방문이면 입실 환영 의례 노출)
       const hasSeenWelcome = window.localStorage.getItem("mm_welcome_seen_v1");
       if (hasSeenWelcome === "true") {
         setShowWelcomeRitual(false);
@@ -107,11 +114,13 @@ export default function MarginMailboxHomePage() {
     }
   };
 
+  // RLS가 적용된 가시 게시글
   const rlsVisiblePosts = useMemo(
     () => filterPostsByRLS(posts, CURRENT_USER_ID),
     [posts]
   );
 
+  // 요일별 + 감정 보호 필터가 적용된 오늘의 시 편지 (1~2통)
   const dailyLetters: LetterDelivery[] = useMemo(() => {
     const valence =
       checkinResult && checkinResult.allowed ? checkinResult.valence : "neutral";
@@ -130,6 +139,7 @@ export default function MarginMailboxHomePage() {
     });
   }, [posts, checkinResult, selectedDayOfWeek]);
 
+  // 감정 체크인 API 호출 (/api/checkin)
   const handleCheckinSubmit = async (overrideText?: string) => {
     const textToUse = (overrideText ?? emotionInput).trim();
     if (!textToUse) return;
@@ -154,6 +164,7 @@ export default function MarginMailboxHomePage() {
     }
   };
 
+  // 글쓰기 에디터 저장 (/api/posts)
   const handleSavePost = async (params: {
     title: string;
     content: string;
@@ -183,6 +194,7 @@ export default function MarginMailboxHomePage() {
     }
   };
 
+  // 비공개 글을 편지로 발송 전환
   const handleDispatchPrivatePost = (postId: string) => {
     const updated = posts.map((p) =>
       p.id === postId ? { ...p, is_public: true } : p
@@ -193,6 +205,7 @@ export default function MarginMailboxHomePage() {
     }
   };
 
+  // 시 전문 화면에서 단상(댓글) 남기기 (/api/comments)
   const handleAddComment = async (
     postId: string,
     quotedLine: string,
@@ -224,8 +237,12 @@ export default function MarginMailboxHomePage() {
 
   return (
     <div className="bg-surface text-on-surface font-body-md text-body-md antialiased min-h-dvh flex flex-col">
+      {/* =====================================================================
+          상단 고정 헤더 (5개 핵심 탭: [오늘의 편지함] / [글쓰기] / [나의 서재] / [밤하늘 우체국] / [관리자])
+         ===================================================================== */}
       <header className="fixed top-0 left-0 w-full z-50 bg-surface/90 backdrop-blur-md shadow-[0_1px_8px_rgba(34,26,20,0.03)] border-b border-outline-variant/30">
         <div className="min-h-[68px] max-w-[1100px] mx-auto px-4 sm:px-6 py-2 flex flex-wrap items-center justify-between gap-2">
+          {/* 브랜드 로고 & 서브타이틀 */}
           <div className="flex items-center gap-space-sm">
             <button
               type="button"
@@ -234,6 +251,7 @@ export default function MarginMailboxHomePage() {
                 setActiveTab("mailbox");
               }}
               className="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center shadow-xs font-headline-md text-xs"
+              title="여백의 우체통 홈"
             >
               餘白
             </button>
@@ -254,7 +272,11 @@ export default function MarginMailboxHomePage() {
             </div>
           </div>
 
-          <nav aria-label="전체 네비게이션" className="flex items-center gap-1 sm:gap-space-xs flex-wrap">
+          {/* 5개 핵심 탭 네비게이션 */}
+          <nav
+            aria-label="전체 네비게이션"
+            className="flex items-center gap-1 sm:gap-space-xs flex-wrap"
+          >
             {navItems.map((tab) => {
               const isActive = !showWelcomeRitual && activeTab === tab.id;
               return (
@@ -285,6 +307,8 @@ export default function MarginMailboxHomePage() {
                 </button>
               );
             })}
+
+            {/* 입실 환영 의례(page_12) 다시보기 버튼 */}
             <button
               type="button"
               data-testid="reopen-welcome-ritual-btn"
@@ -294,6 +318,7 @@ export default function MarginMailboxHomePage() {
                   ? "border-primary bg-primary-fixed text-primary font-semibold"
                   : "border-outline-variant/50 text-tertiary hover:text-primary"
               }`}
+              title="첫 방문 입실 환영 서신(page_12) 보기"
             >
               입실서신
             </button>
@@ -301,25 +326,43 @@ export default function MarginMailboxHomePage() {
         </div>
       </header>
 
+      {/* 본문 영역 */}
       <main className="w-full flex-1 pt-[76px] sm:pt-[68px] bg-surface flex flex-col">
+        {/* 관리자 권한 차단 안내 배너 */}
         {adminDeniedNotice && (
           <div className="max-w-[1100px] w-full mx-auto px-4 sm:px-6 pt-4">
-            <div role="alert" className="p-3.5 rounded-xl bg-error-container/50 border border-error/40 text-xs text-on-error-container flex items-center justify-between gap-2 flex-wrap">
-              <span>현재 계정(<code>{currentEmail}</code>)은 <code>ADMIN_EMAILS</code> 화이트리스트에 등록되어 있지 않아 관리자 콘솔 접근이 차단되었습니다.</span>
-              <button
-                type="button"
-                onClick={() => {
-                  handleSwitchRole("admin@marginmailbox.kr");
-                  setActiveTab("admin");
-                }}
-                className="px-3 py-1 rounded bg-primary text-on-primary font-medium"
-              >
-                관리자 계정으로 전환하여 열기
-              </button>
+            <div
+              role="alert"
+              className="p-3.5 rounded-xl bg-error-container/50 border border-error/40 text-xs text-on-error-container flex items-center justify-between gap-2 flex-wrap"
+            >
+              <span>
+                현재 계정(<code>{currentEmail}</code>)은 <code>ADMIN_EMAILS</code>{" "}
+                화이트리스트에 등록되어 있지 않아 관리자 콘솔 접근이 차단되었습니다.
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleSwitchRole("admin@marginmailbox.kr");
+                    setActiveTab("admin");
+                  }}
+                  className="px-3 py-1 rounded bg-primary text-on-primary font-medium"
+                >
+                  관리자 계정으로 전환하여 열기
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAdminDeniedNotice(false)}
+                  className="px-2 py-1"
+                >
+                  ✕
+                </button>
+              </div>
             </div>
           </div>
         )}
 
+        {/* 1. 첫 방문 입실 환영 의례 (page_12.html) */}
         {showWelcomeRitual ? (
           <WelcomeRitualView
             penName={CURRENT_USER_PEN_NAME}
@@ -331,6 +374,7 @@ export default function MarginMailboxHomePage() {
           />
         ) : (
           <>
+            {/* 2. 오늘의 편지함 & 왁스 실링 개봉 (page_1, page_13, page_2) */}
             {activeTab === "mailbox" && (
               <TodaysMailboxView
                 emotionInput={emotionInput}
@@ -347,15 +391,25 @@ export default function MarginMailboxHomePage() {
                 onGoToLibrary={() => setActiveTab("library")}
               />
             )}
-            {activeTab === "write" && <WritingEditorView onSavePost={handleSavePost} />}
+
+            {/* 3. 글쓰기 에디터 (page_3) */}
+            {activeTab === "write" && (
+              <WritingEditorView onSavePost={handleSavePost} />
+            )}
+
+            {/* 4. 나의 서재 & 답장 모달 (page_4 ~ page_8) */}
             {activeTab === "library" && (
               <MyLibraryView
                 posts={rlsVisiblePosts}
                 onDispatchPrivatePost={handleDispatchPrivatePost}
-                onSendWarmthNoteToNightSky={(noteText) => setUserWarmthNote(noteText)}
+                onSendWarmthNoteToNightSky={(noteText) =>
+                  setUserWarmthNote(noteText)
+                }
                 onGoToTodaysMailbox={() => setActiveTab("mailbox")}
               />
             )}
+
+            {/* 5. 밤하늘 우체국 (page_9 & page_10) */}
             {activeTab === "night-sky" && (
               <NightSkyPostOfficeView
                 userWarmthNote={userWarmthNote}
@@ -363,17 +417,23 @@ export default function MarginMailboxHomePage() {
                 onNavigateTab={(tab) => setActiveTab(tab)}
               />
             )}
+
+            {/* 6. 관리자 콘솔 (page_11) */}
             {activeTab === "admin" && (
               <AdminConsoleView
                 nightPostToggle={nightPostToggle}
                 setNightPostToggle={setNightPostToggle}
-                onRegisterExpertPoem={(newPoem) => setPosts([newPoem, ...posts])}
+                onRegisterExpertPoem={(newPoem) => {
+                  const updated = [newPoem, ...posts];
+                  setPosts(updated);
+                }}
               />
             )}
           </>
         )}
       </main>
 
+      {/* 하단 푸터 & 권한 스위처 */}
       <footer className="w-full bg-surface-container-low/70 border-t border-outline-variant/20 py-6">
         <div className="max-w-[1100px] mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="font-caption text-caption text-on-surface-variant tracking-wide">
@@ -381,8 +441,28 @@ export default function MarginMailboxHomePage() {
           </p>
           <div className="flex items-center gap-2 text-xs text-tertiary">
             <span>계정 권한 시뮬레이션:</span>
-            <button type="button" onClick={() => handleSwitchRole("seoyeon@example.com")} className={`px-2 py-0.5 rounded ${currentEmail === "seoyeon@example.com" ? "bg-primary text-on-primary" : "bg-surface-container text-on-surface-variant"}`}>일반 독자</button>
-            <button type="button" onClick={() => handleSwitchRole("admin@marginmailbox.kr")} className={`px-2 py-0.5 rounded ${currentEmail === "admin@marginmailbox.kr" ? "bg-primary text-on-primary" : "bg-surface-container text-on-surface-variant"}`}>관리자(ADMIN_EMAILS)</button>
+            <button
+              type="button"
+              onClick={() => handleSwitchRole("seoyeon@example.com")}
+              className={`px-2 py-0.5 rounded ${
+                currentEmail === "seoyeon@example.com"
+                  ? "bg-primary text-on-primary"
+                  : "bg-surface-container text-on-surface-variant"
+              }`}
+            >
+              일반 독자
+            </button>
+            <button
+              type="button"
+              onClick={() => handleSwitchRole("admin@marginmailbox.kr")}
+              className={`px-2 py-0.5 rounded ${
+                currentEmail === "admin@marginmailbox.kr"
+                  ? "bg-primary text-on-primary"
+                  : "bg-surface-container text-on-surface-variant"
+              }`}
+            >
+              관리자(ADMIN_EMAILS)
+            </button>
           </div>
         </div>
       </footer>

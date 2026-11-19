@@ -6,6 +6,8 @@ import type { PoemPost } from "@/types/domain";
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const viewerId = searchParams.get("viewerId") || "user-me";
+
+  // RLS 규칙: 공개(is_public=true) 글이거나 작성자 본인(author_id === viewerId)인 글만 반환
   const visiblePosts = filterPostsByRLS(INITIAL_SEED_POSTS, viewerId);
   return NextResponse.json({ posts: visiblePosts });
 }
@@ -14,17 +16,35 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const title = typeof body?.title === "string" ? body.title.trim() : "";
-    const content = typeof body?.content === "string" ? body.content.trim() : "";
-    const isPublic = typeof body?.is_public === "boolean" ? body.is_public : false;
-    const category = body?.category === "diary" || body?.category === "poem" ? body.category : "poem";
-    const authorId = typeof body?.author_id === "string" && body.author_id ? body.author_id : "user-me";
-    const authorPenName = typeof body?.author_pen_name === "string" && body.author_pen_name ? body.author_pen_name : "달무리 서재";
+    const content =
+      typeof body?.content === "string" ? body.content.trim() : "";
+    const isPublic =
+      typeof body?.is_public === "boolean" ? body.is_public : false;
+    const category =
+      body?.category === "diary" || body?.category === "poem"
+        ? body.category
+        : "poem";
+    const authorId =
+      typeof body?.author_id === "string" && body.author_id
+        ? body.author_id
+        : "user-me";
+    const authorPenName =
+      typeof body?.author_pen_name === "string" && body.author_pen_name
+        ? body.author_pen_name
+        : "가을산책자";
 
     if (!title || !content) {
-      return NextResponse.json({ error: "제목과 본문을 모두 입력해 주세요." }, { status: 400 });
+      return NextResponse.json(
+        { error: "제목과 본문을 모두 입력해 주세요." },
+        { status: 400 }
+      );
     }
 
-    const { emotion_tags, mood_valence } = analyzePostMoodAndTags(title, content);
+    const { emotion_tags, mood_valence } = analyzePostMoodAndTags(
+      title,
+      content
+    );
+
     const newPost: PoemPost = {
       id: `post-${Date.now()}`,
       author_id: authorId,
@@ -41,6 +61,9 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ post: newPost }, { status: 201 });
   } catch {
-    return NextResponse.json({ error: "글 저장 중 오류가 발생했습니다." }, { status: 500 });
+    return NextResponse.json(
+      { error: "글 저장 중 오류가 발생했습니다." },
+      { status: 500 }
+    );
   }
 }

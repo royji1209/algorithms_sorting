@@ -21,6 +21,7 @@ const config: Config = {
           muted: "var(--color-text-secondary)",
           border: "var(--color-border)",
         },
+        /* Stitch Design System Tokens */
         "surface-bright": "#fff8f5",
         tertiary: "#61534a",
         "inverse-on-surface": "#ffede4",
@@ -109,6 +110,52 @@ const config: Config = {
           "serif",
         ],
         "title-md": ["var(--font-noto-serif-kr)", "Noto Serif KR", "serif"],
+      },
+      fontSize: {
+        "ui-label-md": [
+          "13px",
+          { lineHeight: "18px", letterSpacing: "0.03em", fontWeight: "500" },
+        ],
+        "headline-md": [
+          "22px",
+          { lineHeight: "34px", letterSpacing: "0em", fontWeight: "500" },
+        ],
+        "body-lg": [
+          "18px",
+          { lineHeight: "32px", letterSpacing: "0.01em", fontWeight: "400" },
+        ],
+        "body-md": [
+          "16px",
+          { lineHeight: "28px", letterSpacing: "0.01em", fontWeight: "400" },
+        ],
+        "ui-label-sm": [
+          "11px",
+          { lineHeight: "16px", letterSpacing: "0.06em", fontWeight: "600" },
+        ],
+        "body-sm": [
+          "14px",
+          { lineHeight: "24px", letterSpacing: "0.01em", fontWeight: "400" },
+        ],
+        "headline-lg": [
+          "28px",
+          { lineHeight: "40px", letterSpacing: "-0.01em", fontWeight: "500" },
+        ],
+        caption: [
+          "12px",
+          { lineHeight: "18px", letterSpacing: "0.02em", fontWeight: "400" },
+        ],
+        "display-lg": [
+          "40px",
+          { lineHeight: "56px", letterSpacing: "-0.02em", fontWeight: "400" },
+        ],
+        "display-lg-mobile": [
+          "30px",
+          { lineHeight: "42px", letterSpacing: "-0.01em", fontWeight: "400" },
+        ],
+        "title-md": [
+          "18px",
+          { lineHeight: "28px", letterSpacing: "0em", fontWeight: "500" },
+        ],
       },
       minHeight: {
         dvh: "100dvh",
