@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+
+<html lang="ko"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Noto+Serif+KR:wght@400;500;600&amp;family=Noto+Serif:wght@400;500&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}
+
+/* Asynchronous Floating Drift Animations with Gentle Sine-wave Easing */
+@keyframes celestialFloat1 {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+@keyframes celestialFloat2 {
+  0%, 100% { transform: translateY(-2px); }
+  50% { transform: translateY(-9px); }
+}
+@keyframes celestialFloat3 {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-7px); }
+}
+@keyframes celestialFloat4 {
+  0%, 100% { transform: translateY(-3px); }
+  50% { transform: translateY(-9px); }
+}
+
+.animate-float-1 { animation: celestialFloat1 6.2s ease-in-out infinite; }
+.animate-float-2 { animation: celestialFloat2 7.4s ease-in-out infinite; }
+.animate-float-3 { animation: celestialFloat3 5.8s ease-in-out infinite; }
+.animate-float-4 { animation: celestialFloat4 6.8s ease-in-out infinite; }
+
+.celestial-card-wrapper {
+  transition: opacity 1.8s cubic-bezier(0.4, 0, 0.2, 1), filter 1.8s ease;
+  will-change: transform, opacity;
+}
+.celestial-card-wrapper:hover {
+  animation-play-state: paused !important;
+}
+
+.celestial-card-inner {
+  transition: transform 0.35s cubic-bezier(0.2, 0, 0.2, 1), box-shadow 0.35s ease, border-color 0.35s ease;
+}
+
+.celestial-card-wrapper:hover .celestial-card-inner {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 10px 28px -4px rgba(244, 201, 107, 0.35), 0 0 0 1.5px rgba(244, 201, 107, 0.85) !important;
+  border-color: rgba(244, 201, 107, 0.9) !important;
+}
+
+.celestial-fade-out {
+  opacity: 0 !important;
+  pointer-events: none;
+}
+.celestial-fade-in {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-float-1, .animate-float-2, .animate-float-3, .animate-float-4 {
+    animation: none !important;
+  }
+  .celestial-card-wrapper {
+    transition: opacity 0.5s ease !important;
+  }
+}
+</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"primary-fixed-dim":"#ffb4a7","tertiary-fixed-dim":"#d6c3b7","surface":"#fff8f5","on-tertiary-container":"#ffeee5","on-primary":"#ffffff","surface-container-highest":"#f0dfd6","on-surface-variant":"#57423e","on-secondary-fixed":"#291800","surface-container-high":"#f6e5db","surface-tint":"#a43b2c","outline-variant":"#dec0bb","secondary-container":"#fdba54","on-primary-fixed-variant":"#842417","tertiary-container":"#7a6b61","on-tertiary-fixed":"#241a12","on-secondary-container":"#724a00","background":"#fff8f5","surface-container-low":"#fff1e9","inverse-surface":"#382e28","secondary":"#815500","on-secondary-fixed-variant":"#624000","secondary-fixed-dim":"#fdba54","tertiary":"#61534a","primary":"#983224","on-tertiary":"#ffffff","on-error-container":"#93000a","on-background":"#221a14","outline":"#8a716d","surface-bright":"#fff8f5","on-secondary":"#ffffff","on-tertiary-fixed-variant":"#51443b","surface-container-lowest":"#ffffff","error":"#ba1a1a","surface-dim":"#e7d7cd","tertiary-fixed":"#f3dfd2","inverse-primary":"#ffb4a7","surface-variant":"#f0dfd6","primary-fixed":"#ffdad4","on-error":"#ffffff","error-container":"#ffdad6","primary-container":"#b84a39","secondary-fixed":"#ffddb2","on-primary-fixed":"#400200","inverse-on-surface":"#ffede4","on-primary-container":"#ffedea","surface-container":"#fcebe1","on-surface":"#221a14"},borderRadius:{DEFAULT:"0.125rem",lg:"0.25rem",xl:"0.5rem",full:"0.75rem"},spacing:{"space-sm":"0.75rem","space-xl":"3.5rem",margin:"2rem","space-xs":"0.375rem",gutter:"1.5rem","space-md":"1.25rem","space-lg":"2rem"},fontFamily:{"headline-md":["Noto Serif"],"ui-label-sm":["Inter"],caption:["Inter"],"body-lg":["Noto Serif"],"body-sm":["Noto Serif"],"ui-label-md":["Inter"],"display-lg":["Noto Serif"],"headline-lg":["Noto Serif"],"display-lg-mobile":["Noto Serif"],"title-md":["Noto Serif"],"body-md":["Noto Serif"]},fontSize:{"headline-md":["22px",{lineHeight:"34px",letterSpacing:"0em",fontWeight:"500"}],"ui-label-sm":["11px",{lineHeight:"16px",letterSpacing:"0.06em",fontWeight:"600"}],caption:["12px",{lineHeight:"18px",letterSpacing:"0.02em",fontWeight:"400"}],"body-lg":["18px",{lineHeight:"32px",letterSpacing:"0.01em",fontWeight:"400"}],"body-sm":["14px",{lineHeight:"24px",letterSpacing:"0.01em",fontWeight:"400"}],"ui-label-md":["13px",{lineHeight:"18px",letterSpacing:"0.03em",fontWeight:"500"}],"display-lg":["40px",{lineHeight:"56px",letterSpacing:"-0.02em",fontWeight:"400"}],"headline-lg":["28px",{lineHeight:"40px",letterSpacing:"-0.01em",fontWeight:"500"}],"display-lg-mobile":["30px",{lineHeight:"42px",letterSpacing:"-0.01em",fontWeight:"400"}],"title-md":["18px",{lineHeight:"28px",letterSpacing:"0em",fontWeight:"500"}],"body-md":["16px",{lineHeight:"28px",letterSpacing:"0.01em",fontWeight:"400"}]}}}};</script></head><body class="bg-surface font-body-md text-on-surface antialiased selection:bg-[#F4C96B] selection:text-[#131B2E]"><header class="fixed top-0 left-0 right-0 z-50 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(45,36,30,0.03)] transition-all duration-300"><div class="h-20 max-w-[1100px] mx-auto px-gutter flex items-center justify-between"><a class="group flex flex-col justify-center select-none" data-path="todays-mailbox" href="#"><span class="font-headline-md text-headline-md tracking-tight text-on-surface group-hover:text-primary transition-colors">여백의 우체통</span><span class="font-ui-label-sm text-ui-label-sm text-tertiary tracking-widest mt-space-xs">마음이 쉬어가는 한 줄</span></a><nav class="hidden md:flex items-center gap-space-lg" data-active-classes="text-primary font-bold"><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors py-1" data-path="todays-mailbox" href="#">오늘의 편지함</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors py-1" data-path="compose-letter" href="#">글쓰기</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors py-1" data-path="my-library" href="#">나의 서재</a><a aria-current="page" class="transition-colors py-1 text-primary font-bold" data-path="night-sky-post-office" href="#">밤하늘 우체국</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors py-1" data-path="curator-desk" href="#">관리자</a></nav><div class="flex items-center gap-space-md"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-20 bg-surface min-h-[calc(100vh-180px)]"><div class="flex flex-col w-full">
+<!-- Midnight Sky Transit Atmosphere Layer (Deep Autumn Midnight Navy: #131B2E -> #1D2942) -->
+<section class="relative w-full overflow-hidden text-slate-100 py-space-xl px-gutter" style="background: linear-gradient(180deg, #131B2E 0%, #172138 55%, #1D2942 100%);">
+<!-- Star & Celestial Particle Atmosphere Background with Warm Ginkgo Gold (#F4C96B & #D99B38) -->
+<div class="absolute inset-0 pointer-events-none opacity-60">
+<svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<radialgradient cx="50%" cy="25%" id="skyGlow" r="65%">
+<stop offset="0%" stop-color="#F4C96B" stop-opacity="0.14"></stop>
+<stop offset="30%" stop-color="#D99B38" stop-opacity="0.08"></stop>
+<stop offset="70%" stop-color="#B84A39" stop-opacity="0.05"></stop>
+<stop offset="100%" stop-color="#131B2E" stop-opacity="0"></stop>
+</radialgradient>
+</defs>
+<rect fill="url(#skyGlow)" height="100%" width="100%"></rect>
+<!-- Micro Constellation Points in Ginkgo Gold & Soft Cream -->
+<circle cx="12%" cy="18%" fill="#F4C96B" opacity="0.85" r="1.2"></circle>
+<circle cx="28%" cy="14%" fill="#F4C96B" opacity="0.9" r="1.5"></circle>
+<circle cx="36%" cy="28%" fill="#FFFDF9" opacity="0.5" r="1"></circle>
+<circle cx="48%" cy="12%" fill="#D99B38" opacity="0.75" r="1.8"></circle>
+<circle cx="68%" cy="18%" fill="#F4C96B" opacity="0.85" r="1.6"></circle>
+<circle cx="82%" cy="24%" fill="#D99B38" opacity="0.7" r="1.5"></circle>
+<circle cx="91%" cy="12%" fill="#F4C96B" opacity="0.95" r="2.2"></circle>
+<circle cx="18%" cy="62%" fill="#FFFDF9" opacity="0.5" r="1.2"></circle>
+<circle cx="75%" cy="68%" fill="#F4C96B" opacity="0.65" r="1.4"></circle>
+<circle cx="88%" cy="78%" fill="#D99B38" opacity="0.6" r="1.2"></circle>
+<!-- Delicate Constellation Trajectory Line in Warm Gold -->
+<path d="M 150 120 Q 420 70, 780 150 T 1150 95" fill="none" stroke="#F4C96B" stroke-dasharray="3 7" stroke-opacity="0.25"></path>
+</svg>
+</div>
+<div class="relative max-w-[1100px] mx-auto flex flex-col gap-space-lg">
+<!-- Top Midnight Protocol Notice Banner: 21:00 ~ 04:00 Exclusive Hours -->
+<div class="w-full flex items-center justify-between flex-wrap gap-2 px-4 py-2.5 rounded-xl bg-slate-900/60 border border-[#F4C96B]/25 backdrop-blur-md text-xs sm:text-sm">
+<div class="flex items-center gap-2.5">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#F4C96B]/15 text-[#F4C96B] font-ui-label-sm font-semibold tracking-wider border border-[#F4C96B]/30">
+<span class="w-1.5 h-1.5 rounded-full bg-[#F4C96B] animate-pulse"></span>
+심야 개장 운영 중
+</span>
+<span class="text-slate-200 font-body-sm">
+심야 한정 개장 구역 · 매일 밤 <strong class="text-[#F4C96B] font-semibold">21:00</strong> — 새벽 <strong class="text-[#F4C96B] font-semibold">04:00</strong>에만 열리는 별빛 우편 궤도
+</span>
+</div>
+<div class="flex items-center gap-2 text-slate-300/80 font-caption text-caption">
+<span class="material-symbols-outlined text-[15px] text-[#F4C96B]">nights_stay</span>
+<span>21:00~04:00 개장 규약 적용</span>
+</div>
+</div>
+<!-- Top Section: Midnight Countdown & Poetic Statement -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md border-b-0 pb-2">
+<div class="space-y-space-xs max-w-2xl">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/70 text-[#F4C96B] border border-[#F4C96B]/20 backdrop-blur-sm shadow-sm">
+<span class="w-2 h-2 rounded-full bg-[#F4C96B] animate-ping"></span>
+<span class="font-ui-label-sm text-ui-label-sm tracking-widest text-[#F4C96B]">밤하늘 우편국 유영 궤도</span>
+<span class="text-xs opacity-60">|</span>
+<span class="font-ui-label-sm text-ui-label-sm text-slate-300">전달 대기 중인 고요한 마음들</span>
+</div>
+<p class="font-body-md text-body-md text-slate-300 leading-relaxed pt-space-xs">
+            띄워보낸 온기들은 밤하늘 별빛 사이를 천천히 유영하다,<br class="hidden md:inline"/>
+            자정의 종소리와 함께 상대방의 고요한 우편함으로 조용히 내려앉습니다.
+          </p>
+</div>
+<!-- Live Midnight Timer Capsule -->
+<div class="bg-slate-900/60 border border-[#F4C96B]/20 backdrop-blur-md px-space-md py-space-sm rounded-xl flex flex-col items-start md:items-end shadow-md">
+<div class="flex items-center gap-space-xs font-ui-label-sm text-ui-label-sm text-[#F4C96B] tracking-wider">
+<span class="material-symbols-outlined text-[15px] text-[#F4C96B]">bedtime</span>
+<span>자정(24:00) 발송까지 남은 침묵</span>
+</div>
+<div class="flex items-baseline gap-1 mt-1 font-headline-lg text-headline-lg tracking-tight text-white">
+<span id="countdown-hours">00</span>
+<span class="text-[#F4C96B] font-caption text-caption opacity-80">시</span>
+<span id="countdown-minutes">24</span>
+<span class="text-[#F4C96B] font-caption text-caption opacity-80">분</span>
+<span class="text-[#F4C96B] font-semibold" id="countdown-seconds">21</span>
+<span class="text-[#F4C96B] font-caption text-caption opacity-80">초</span>
+</div>
+<span class="font-caption text-caption text-slate-400 mt-0.5">상대방의 수면을 방해하지 않는 심야 규약</span>
+</div>
+</div>
+<!-- Mode Switch & Starlit Celestial Observatory Stage -->
+<div class="relative w-full rounded-2xl bg-slate-900/40 border border-[#F4C96B]/15 backdrop-blur-lg p-space-md md:p-space-lg shadow-2xl overflow-hidden min-h-[530px] flex flex-col justify-between">
+<!-- Filter Bar inside canvas -->
+<div class="flex flex-wrap items-center justify-between gap-space-sm z-10">
+<div class="inline-flex p-1 rounded-full bg-slate-950/70 border border-[#F4C96B]/20 shadow-inner">
+<button class="px-space-md py-1.5 rounded-full font-ui-label-sm text-ui-label-sm text-[#131B2E] font-semibold bg-[#F4C96B] hover:bg-[#ffe08e] transition-all shadow-sm" id="filter-all">
+              밤하늘 전체 유영 (142통의 온기)
+            </button>
+<button class="px-space-md py-1.5 rounded-full font-ui-label-sm text-ui-label-sm text-slate-300 hover:text-white transition-all" id="filter-mine">
+              내가 띄운 온기 (1)
+            </button>
+</div>
+<div class="hidden sm:flex items-center gap-space-xs font-caption text-caption text-slate-300">
+<span class="inline-block w-2.5 h-2.5 rounded-full bg-[#F4C96B] shadow-[0_0_8px_#F4C96B] transition-all duration-1000" id="cycle-indicator-dot"></span>
+<span id="cycle-status-text">개별 별빛 궤도 순환 중 (8~10초 자율 주기)</span>
+<span class="text-xs text-slate-400 ml-1">· 마우스를 올리면 순환이 멈추고 전문을 읽을 수 있습니다</span>
+</div>
+</div>
+<!-- Floating Lantern Letters Canvas: Non-overlapping 4-zone spatial layout (2x2 balanced grid with generous clearance) -->
+<div class="relative w-full my-auto py-4">
+<!-- Orbit Decorative Ellipse with Warm Ginkgo Gold Radiance -->
+<div class="absolute inset-0 m-auto w-[90%] h-[320px] rounded-full opacity-25 pointer-events-none rotate-[-4deg]" style="background: radial-gradient(ellipse at center, rgba(244, 201, 107, 0.22) 0%, rgba(217, 155, 56, 0.08) 45%, rgba(19, 27, 46, 0) 72%);"></div>
+<!-- Dedicated 4 Spatial Slots: Top-Left, Top-Right, Bottom-Left, Bottom-Right with Zero Collision -->
+<div class="relative grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-7 w-full max-w-[980px] mx-auto z-10" id="celestial-canvas-stage">
+<!-- SLOT 1: Top-Left (Primary Slot / User's Note) -->
+<div class="celestial-card-wrapper animate-float-1 group cursor-pointer" data-slot="0" id="celestial-slot-1">
+<div class="celestial-card-inner relative p-4 rounded-xl bg-[#FFFDF9] text-on-surface shadow-[0_6px_22px_rgba(19,27,46,0.35)] border border-[#dec0bb]/70 backdrop-blur-md" id="card-inner-1">
+<div class="flex items-center justify-between pb-1.5 mb-1.5 border-b border-surface-container/60">
+<span class="inline-flex items-center gap-1.5 font-ui-label-sm text-ui-label-sm text-[#B84A39] font-semibold" id="slot-1-tag">
+<span class="w-1.5 h-1.5 rounded-full bg-[#B84A39] animate-pulse" id="slot-1-tag-dot"></span>
+<span id="slot-1-tag-text">나의 온기 쪽지</span>
+</span>
+<span class="font-caption text-caption text-tertiary font-mono" id="slot-1-badge">대기 순번 #019</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface leading-relaxed min-h-[54px] select-none" id="slot-1-content">
+        "마음에 닿아 기쁩니다. 바람이 차가워지는 밤, 당신의 방 안은 온기로 가득하길 바랍니다."
+      </p>
+<div class="mt-2.5 pt-1.5 border-t border-surface-container/60 flex items-center justify-between font-caption text-caption text-tertiary">
+<span class="truncate max-w-[65%]" id="slot-1-recipient">11월 12일의 답장 이웃 앞</span>
+<span class="text-[#B84A39] font-medium shrink-0" id="slot-1-status">유영 중</span>
+</div>
+<!-- Hover Reading Badge in Warm Ginkgo Gold -->
+<div class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 absolute -top-2.5 right-4 px-2 py-0.5 rounded-full bg-[#F4C96B] text-[#131B2E] font-ui-label-sm text-ui-label-sm font-semibold shadow-md flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">visibility</span>
+<span>클릭하여 전문 읽기</span>
+</div>
+</div>
+<!-- Lantern String and Warm Ginkgo Gold Glowing Beacon -->
+<div class="flex flex-col items-center">
+<div class="w-0.5 h-4 bg-[#F4C96B]/60"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-[#F4C96B] shadow-[0_0_12px_#F4C96B]"></div>
+</div>
+</div>
+<!-- SLOT 2: Top-Right (Literary Quote / Deep Thought) -->
+<div class="celestial-card-wrapper animate-float-2 group cursor-pointer" data-slot="1" id="celestial-slot-2">
+<div class="celestial-card-inner relative p-4 rounded-xl bg-[#FFFDF9]/95 text-on-surface shadow-[0_6px_22px_rgba(19,27,46,0.35)] border border-[#dec0bb]/70 backdrop-blur-md" id="card-inner-2">
+<div class="flex items-center justify-between pb-1.5 mb-1.5 border-b border-surface-container/60">
+<span class="inline-flex items-center gap-1.5 font-ui-label-sm text-ui-label-sm text-tertiary font-semibold" id="slot-2-tag">
+<span class="w-1.5 h-1.5 rounded-full bg-[#D99B38] hidden" id="slot-2-tag-dot"></span>
+<span id="slot-2-tag-text">짧은 감사 쪽지</span>
+</span>
+<span class="font-caption text-caption text-tertiary font-mono" id="slot-2-badge">대기 순번 #084</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface leading-relaxed min-h-[54px] select-none" id="slot-2-content">
+        "당신의 계절도 평온하길. 건네주신 한 줄의 시 덕분에 오늘의 불안을 조금 내려놓았습니다."
+      </p>
+<div class="mt-2.5 pt-1.5 border-t border-surface-container/60 flex items-center justify-between font-caption text-caption text-tertiary">
+<span class="truncate max-w-[65%]" id="slot-2-recipient">바다 건너 전해질 온기</span>
+<span class="text-tertiary font-medium shrink-0" id="slot-2-status">자정 전달 예정</span>
+</div>
+<!-- Hover Reading Badge in Warm Ginkgo Gold -->
+<div class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 absolute -top-2.5 right-4 px-2 py-0.5 rounded-full bg-[#F4C96B] text-[#131B2E] font-ui-label-sm text-ui-label-sm font-semibold shadow-md flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">visibility</span>
+<span>클릭하여 전문 읽기</span>
+</div>
+</div>
+<!-- Lantern String and Warm Ginkgo Gold Glowing Beacon -->
+<div class="flex flex-col items-center">
+<div class="w-0.5 h-4 bg-[#F4C96B]/50"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-[#D99B38] shadow-[0_0_10px_#D99B38]"></div>
+</div>
+</div>
+<!-- SLOT 3: Bottom-Left (Anonymous Warmth / Autumn Solitude) -->
+<div class="celestial-card-wrapper animate-float-3 group cursor-pointer" data-slot="2" id="celestial-slot-3">
+<div class="celestial-card-inner relative p-4 rounded-xl bg-[#FFFDF9]/95 text-on-surface shadow-[0_6px_22px_rgba(19,27,46,0.35)] border border-[#dec0bb]/70 backdrop-blur-md" id="card-inner-3">
+<div class="flex items-center justify-between pb-1.5 mb-1.5 border-b border-surface-container-highest/60">
+<span class="inline-flex items-center gap-1.5 font-ui-label-sm text-ui-label-sm text-secondary font-medium" id="slot-3-tag">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary hidden" id="slot-3-tag-dot"></span>
+<span id="slot-3-tag-text">익명의 가을 편지</span>
+</span>
+<span class="font-caption text-caption text-tertiary" id="slot-3-badge">익명</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed min-h-[54px] select-none" id="slot-3-content">
+        "오늘 퇴근길에 마주친 바람이 낯설지 않았습니다. 모두 저마다의 계절을 견디는 중이겠지요."
+      </p>
+<div class="mt-2.5 pt-1.5 border-t border-surface-container-highest/60 flex items-center justify-between font-caption text-caption text-tertiary">
+<span class="truncate max-w-[65%]" id="slot-3-recipient">서울 어딘가의 이웃 앞</span>
+<span class="text-secondary font-medium shrink-0" id="slot-3-status">별빛 순항 중</span>
+</div>
+<!-- Hover Reading Badge in Warm Ginkgo Gold -->
+<div class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 absolute -top-2.5 right-4 px-2 py-0.5 rounded-full bg-[#F4C96B] text-[#131B2E] font-ui-label-sm text-ui-label-sm font-semibold shadow-md flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">visibility</span>
+<span>클릭하여 전문 읽기</span>
+</div>
+</div>
+<!-- Lantern String and Warm Ginkgo Gold Glowing Beacon -->
+<div class="flex flex-col items-center">
+<div class="w-0.5 h-4 bg-[#F4C96B]/50"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-[#F4C96B] shadow-[0_0_10px_#F4C96B]"></div>
+</div>
+</div>
+<!-- SLOT 4: Bottom-Right (Poetic Excerpt Bookmarks) -->
+<div class="celestial-card-wrapper animate-float-4 group cursor-pointer" data-slot="3" id="celestial-slot-4">
+<div class="celestial-card-inner relative p-4 rounded-xl bg-[#FFFDF9]/95 text-on-surface shadow-[0_6px_22px_rgba(19,27,46,0.35)] border border-[#dec0bb]/70 backdrop-blur-md" id="card-inner-4">
+<div class="flex items-center justify-between pb-1.5 mb-1.5 border-b border-surface-container-highest/60">
+<span class="inline-flex items-center gap-1.5 font-ui-label-sm text-ui-label-sm text-[#B84A39] font-medium" id="slot-4-tag">
+<span class="w-1.5 h-1.5 rounded-full bg-[#B84A39] hidden" id="slot-4-tag-dot"></span>
+<span id="slot-4-tag-text">오늘의 시 낭독 조각</span>
+</span>
+<span class="font-caption text-caption text-tertiary" id="slot-4-badge">책갈피</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant italic leading-relaxed min-h-[54px] select-none" id="slot-4-content">
+        "별 하나에 추억과, 별 하나에 사랑과, 별 하나에 쓸쓸함과, 별 하나에 시와..."
+      </p>
+<div class="mt-2.5 pt-1.5 border-t border-surface-container-highest/60 flex items-center justify-between font-caption text-caption text-tertiary">
+<span class="truncate max-w-[65%]" id="slot-4-recipient">윤동주 · 별 헤는 밤 발췌</span>
+<span class="text-tertiary font-medium shrink-0" id="slot-4-status">시선 머묾</span>
+</div>
+<!-- Hover Reading Badge in Warm Ginkgo Gold -->
+<div class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 absolute -top-2.5 right-4 px-2 py-0.5 rounded-full bg-[#F4C96B] text-[#131B2E] font-ui-label-sm text-ui-label-sm font-semibold shadow-md flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">visibility</span>
+<span>클릭하여 전문 읽기</span>
+</div>
+</div>
+<!-- Lantern String and Warm Ginkgo Gold Glowing Beacon -->
+<div class="flex flex-col items-center">
+<div class="w-0.5 h-4 bg-[#F4C96B]/50"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-[#D99B38] shadow-[0_0_8px_#D99B38]"></div>
+</div>
+</div>
+</div>
+<!-- End 4 Dedicated Slots -->
+</div>
+<!-- Sky Canvas Bottom Status strip -->
+<div class="pt-space-sm flex flex-col sm:flex-row items-center justify-between gap-space-sm text-slate-300 font-caption text-caption z-10 border-t border-slate-700/50">
+<div class="flex items-center gap-space-md">
+<span class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-[#F4C96B] animate-pulse"></span>
+              등불 온기 고도: 성층권 12,000m 고요 구역
+            </span>
+<span class="hidden sm:inline text-slate-500">|</span>
+<span class="hidden sm:inline">실시간 밤바람 속도: 1.2 knot (미풍)</span>
+</div>
+<div class="text-[#F4C96B] flex items-center gap-2">
+<span class="text-slate-200">수신인 알림: 2026. 11. 18 24:00 정각</span>
+<span class="hidden md:inline px-2 py-0.5 rounded-full bg-slate-800/80 border border-[#F4C96B]/30 font-ui-label-sm text-ui-label-sm text-[#F4C96B]" id="orbit-cycle-badge">자율 궤도 비행 중</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Physical Editorial Paper Sheet & Delivery Status Details -->
+<section class="w-full bg-surface py-space-xl px-gutter">
+<div class="max-w-[1100px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+<!-- Left Column: Postal Manifest & Tonight's Metric (5 cols) -->
+<div class="lg:col-span-5 flex flex-col gap-space-md">
+<div class="p-space-lg rounded-2xl bg-surface-container-low shadow-sm">
+<div class="flex items-center justify-between pb-space-sm">
+<div class="space-y-0.5">
+<span class="font-ui-label-sm text-ui-label-sm text-secondary uppercase tracking-widest">Postal Manifest</span>
+<h2 class="font-headline-md text-headline-md text-on-surface">오늘 밤 발송 현황</h2>
+</div>
+<div class="w-10 h-10 rounded-full bg-secondary-fixed flex items-center justify-center">
+<span class="material-symbols-outlined text-on-secondary-fixed text-[20px]">local_shipping</span>
+</div>
+</div>
+<p class="font-body-sm text-body-sm text-tertiary mt-space-xs leading-relaxed">
+            여백의 우체통은 '느린 전달의 미학'을 지킵니다. 즉각적인 알림의 피로를 덜어내기 위해 모든 편지는 고요한 밤 자정에 일괄 도착합니다.
+          </p>
+<!-- SVG Visual Donut Gauge for Queue Completion -->
+<div class="mt-space-md pt-space-md flex items-center gap-space-md">
+<div class="relative w-24 h-24 flex-shrink-0 flex items-center justify-center">
+<svg class="w-24 h-24 -rotate-90" viewbox="0 0 36 36">
+<!-- Background track -->
+<path class="text-surface-container-highest stroke-current" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke-width="3.5"></path>
+<!-- Active stroke (100% full queue ready) -->
+<path class="text-primary stroke-current transition-all duration-1000 ease-out" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke-dasharray="100, 100" stroke-linecap="round" stroke-width="3.5"></path>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+<span class="font-headline-md text-headline-md text-primary font-semibold leading-none">100</span>
+<span class="font-ui-label-sm text-ui-label-sm text-tertiary mt-0.5">%</span>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<span class="font-ui-label-md text-ui-label-md text-on-surface font-medium">자정 일괄 전달 보장</span>
+<span class="font-body-sm text-body-sm text-tertiary">밤하늘 유영 대기율 완결</span>
+<span class="font-caption text-caption text-secondary font-medium">훼손 방지 밀랍 디지털 봉인 완료</span>
+</div>
+</div>
+<!-- Numbers breakdown -->
+<div class="grid grid-cols-2 gap-space-sm mt-space-md pt-space-md">
+<div class="p-space-sm rounded-xl bg-surface-container-lowest shadow-sm flex flex-col">
+<span class="font-caption text-caption text-tertiary">띄워진 온기</span>
+<span class="font-headline-md text-headline-md text-on-surface mt-1">142<span class="font-body-sm text-body-sm text-tertiary font-normal ml-1">통</span></span>
+</div>
+<div class="p-space-sm rounded-xl bg-surface-container-lowest shadow-sm flex flex-col">
+<span class="font-caption text-caption text-tertiary">평균 음미 시간</span>
+<span class="font-headline-md text-headline-md text-secondary mt-1">4.8<span class="font-body-sm text-body-sm text-tertiary font-normal ml-1">분</span></span>
+</div>
+</div>
+</div>
+<!-- Atmospheric Photo Card: Quiet Evening Study -->
+<div class="relative rounded-2xl overflow-hidden shadow-md h-52 group">
+<div class="bg-cover bg-center w-full h-full transition-transform duration-700 group-hover:scale-105" data-alt="A serene analog writing desk bathed in warm amber lamplight at twilight, featuring textured cotton stationery, vintage fountain pen with dried sepia ink, autumn fallen leaves, a brass postmark stamp, and soft evening shadows creating a contemplative poetic atmosphere." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuB6Z01OSUNVN3Zz8uiXhFCuDUsv1ywUN8oHUnqAd5BaAG9AU6ISNknUw07cU2roCgjFyh8cA_siBRz6MBWvKURTEYVlVZ5zPV6YAcaGIk-5NiZ_1gv5MZODDSgeV1KuFgTmTBSGqLVhtcY5lLTnmqaPOt8bDNl76s3A3BmrI3--bJcOflwbOsgAxrHO_eaIbFUty49ikg4BEqb1At79-g8COeC0xNkc2q5wsDagfhk')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-inverse-surface/85 via-inverse-surface/30 to-transparent flex flex-col justify-end p-space-md">
+<span class="font-ui-label-sm text-ui-label-sm text-secondary-fixed tracking-widest">밤을 건너는 편지</span>
+<p class="font-body-sm text-body-sm text-surface-container-lowest mt-1">
+              "한 사람의 진심은 서두르지 않을 때 가장 따스하게 스며듭니다."
+            </p>
+</div>
+</div>
+</div>
+<!-- Right Column: My Transit Letter Certificate & Wax Seal (7 cols) -->
+<div class="lg:col-span-7 flex flex-col gap-space-md">
+<!-- Tactile Handmade Parchment Letter Preview Card -->
+<div class="p-space-lg rounded-2xl bg-surface-container-lowest shadow-[0_4px_20px_rgba(45,36,30,0.06)] relative overflow-hidden">
+<!-- Top Watermark & Serial Stamp -->
+<div class="flex flex-wrap items-center justify-between gap-space-xs pb-space-md">
+<div class="flex items-center gap-space-xs">
+<span class="font-ui-label-sm text-ui-label-sm px-2.5 py-1 rounded bg-secondary-fixed text-on-secondary-fixed font-semibold tracking-wider">
+                SEOUL POST NO. 1118-WARM-402
+              </span>
+<span class="font-caption text-caption text-tertiary">정기 야간 편람</span>
+</div>
+<!-- Postmark Timestamp Stamp (Clean analog style) -->
+<div class="px-3 py-1 rounded bg-surface-container-high text-tertiary font-ui-label-sm text-ui-label-sm tracking-widest uppercase">
+              2026. 11. 18 • MIDNIGHT COURIER
+            </div>
+</div>
+<!-- Letter Body Paper Area -->
+<div class="my-space-md pl-space-md relative">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary-container/30 rounded-full"></div>
+<span class="font-ui-label-sm text-ui-label-sm text-primary tracking-widest block mb-space-xs">수신: 11월 12일의 답장 이웃에게</span>
+<p class="font-body-lg text-body-lg text-on-surface leading-loose">
+              "마음에 닿아 기쁩니다. 바람이 차가워지는 밤, 당신의 방 안은 온기로 가득하길 바랍니다.
+              보내주신 찻잔 그림과 짧은 문장이 오늘 하루 종일 지친 발걸음에 다정한 등불이 되어주었습니다.
+              부디 내일 아침 눈을 떴을 때, 어제보다 한결 가벼운 마음으로 창문을 열 수 있기를 소망합니다."
+            </p>
+<div class="mt-space-md flex items-center justify-between text-tertiary font-body-sm text-body-sm">
+<span>띄운 사람: 늦은 가을의 서재로부터</span>
+<span>글자 수: 148자 • 음미 시간 1분</span>
+</div>
+</div>
+<!-- Wax Seal Emblem & Delivery Commitment Strip -->
+<div class="mt-space-lg pt-space-md bg-surface-container-low/60 rounded-xl p-space-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md">
+<!-- Physical Maple Red Wax Seal -->
+<div class="w-14 h-14 rounded-full bg-primary-container flex-shrink-0 flex items-center justify-center shadow-[0_4px_12px_rgba(184,74,57,0.4)] text-on-primary">
+<span class="material-symbols-outlined text-[26px]">eco</span>
+</div>
+<div class="space-y-0.5">
+<span class="font-ui-label-md text-ui-label-md text-on-surface font-semibold">밤하늘 유영 안심 규약</span>
+<p class="font-caption text-caption text-tertiary">
+                  자정 전까지 밤하늘에 고이 머무르며, 서로의 밤을 방해하지 않는 고요한 규칙입니다.
+                </p>
+</div>
+</div>
+<div class="text-right flex-shrink-0">
+<span class="font-ui-label-sm text-ui-label-sm text-primary font-medium block">회수 및 취소 불가</span>
+<span class="font-caption text-caption text-tertiary">별빛 궤도 진입 완료</span>
+</div>
+</div>
+</div>
+<!-- Action Center: Write another or back to bookshelf -->
+<div class="p-space-md rounded-2xl bg-surface-container flex flex-col sm:flex-row items-center justify-between gap-space-md shadow-sm">
+<div class="flex items-center gap-space-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-secondary text-[22px]">history_edu</span>
+<span class="font-body-sm text-body-sm">오늘 밤, 못다 전한 다른 다정한 문장이 남아있나요?</span>
+</div>
+<div class="flex items-center gap-space-sm w-full sm:w-auto">
+<a class="flex-1 sm:flex-initial text-center px-space-md py-2.5 rounded-lg bg-surface-container-lowest hover:bg-surface-container-high text-on-surface font-body-sm text-body-sm transition-colors shadow-sm" data-path="my-library" href="#">
+              나의 서재로 가기
+            </a>
+<a class="flex-1 sm:flex-initial text-center px-space-md py-2.5 rounded-lg bg-primary hover:bg-primary-container text-on-primary font-body-sm text-body-sm transition-colors shadow-md flex items-center justify-center gap-1.5" data-path="compose-letter" href="#">
+<span class="material-symbols-outlined text-[18px]">edit_note</span>
+<span>온기 한 줄 더 띄우기</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Interactive Script for Live Countdown, Independent Asynchronous Fade Cycles, & Hover Controls -->
+<script>
+    (function() {
+      // 1. Midnight live countdown timer
+      function updateCountdown() {
+        const now = new Date();
+        const midnight = new Date();
+        midnight.setHours(24, 0, 0, 0);
+        
+        let diff = midnight.getTime() - now.getTime();
+        if (diff < 0) diff = 0;
+
+        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+        const minutes = Math.floor((diff / (1000 * 60)) % 60);
+        const seconds = Math.floor((diff / 1000) % 60);
+
+        const pad = (n) => String(n).padStart(2, '0');
+
+        const elH = document.getElementById('countdown-hours');
+        const elM = document.getElementById('countdown-minutes');
+        const elS = document.getElementById('countdown-seconds');
+
+        if (elH) elH.textContent = pad(hours);
+        if (elM) elM.textContent = pad(minutes);
+        if (elS) elS.textContent = pad(seconds);
+      }
+      setInterval(updateCountdown, 1000);
+      updateCountdown();
+
+      // 2. Curated Rich Literary Pools for Each Slot
+      const slotPools = [
+        // Slot 1: User's Letters & Sincere Responses (8.5s cycle)
+        [
+          {
+            tag: "나의 온기 쪽지",
+            badge: "대기 순번 #019",
+            content: '"마음에 닿아 기쁩니다. 바람이 차가워지는 밤, 당신의 방 안은 온기로 가득하길 바랍니다."',
+            recipient: "11월 12일의 답장 이웃 앞",
+            status: "유영 중",
+            isMine: true
+          },
+          {
+            tag: "자정의 답장",
+            badge: "대기 순번 #035",
+            content: '"건네주신 국화차 향기 같은 문장이 식지 않고 머뭅니다. 편안한 잠자리가 되시기를 소망합니다."',
+            recipient: "초겨울 창가에서 온 답장",
+            status: "유영 중",
+            isMine: true
+          },
+          {
+            tag: "나의 온기 쪽지",
+            badge: "대기 순번 #062",
+            content: '"보내주신 온기 덕분에 오늘의 무거웠던 마음을 조금 덜어냈습니다. 내일도 다정한 아침 맞이하세요."',
+            recipient: "별을 세던 이웃 앞",
+            status: "궤도 순항",
+            isMine: true
+          }
+        ],
+        // Slot 2: Grateful Thoughts & Anonymous Warm Letters (9.8s cycle)
+        [
+          {
+            tag: "짧은 감사 쪽지",
+            badge: "대기 순번 #084",
+            content: '"당신의 계절도 평온하길. 건네주신 한 줄의 시 덕분에 오늘의 불안을 조금 내려놓았습니다."',
+            recipient: "바다 건너 전해질 온기",
+            status: "자정 전달 예정",
+            isMine: false
+          },
+          {
+            tag: "조용한 책갈피",
+            badge: "대기 순번 #097",
+            content: '"서두르지 않아도 괜찮습니다. 계절은 천천히 지나가고, 당신의 꽃도 알맞은 때에 필 테니까요."',
+            recipient: "꿈을 가꾸는 이웃에게",
+            status: "자정 전달 대기",
+            isMine: false
+          },
+          {
+            tag: "새벽 안부 편지",
+            badge: "대기 순번 #105",
+            content: '"따뜻한 차 한 잔의 온기가 당신에게 닿았으면 합니다. 식지 않는 다정이 머물길 바라며."',
+            recipient: "달빛을 걷는 이웃 앞",
+            status: "별빛 순항 중",
+            isMine: false
+          }
+        ],
+        // Slot 3: Anonymous Autumn Sentiments & Comfort (9.1s cycle)
+        [
+          {
+            tag: "익명의 가을 편지",
+            badge: "익명",
+            content: '"오늘 퇴근길에 마주친 바람이 낯설지 않았습니다. 모두 저마다의 계절을 견디는 중이겠지요."',
+            recipient: "서울 어딘가의 이웃 앞",
+            status: "별빛 순항 중",
+            isMine: false
+          },
+          {
+            tag: "먼 바다의 온기",
+            badge: "익명",
+            content: '"파도 소리를 담아 적습니다. 오늘 밤은 부디 모든 무거운 생각을 내려놓고 깊은 잠에 드시기를."',
+            recipient: "동해 바닷가 우체통 발송",
+            status: "밤하늘 유영 중",
+            isMine: false
+          },
+          {
+            tag: "작은 다독임",
+            badge: "익명",
+            content: '"오늘 하루도 참 많이 애쓰셨습니다. 수고했던 당신의 양 어깨 위에 고요한 위로를 내려놓습니다."',
+            recipient: "퇴근길 버스 창가의 당신",
+            status: "자정 전달 대기",
+            isMine: false
+          }
+        ],
+        // Slot 4: Classic Korean Poetry Literary Bookmarks (10.2s cycle)
+        [
+          {
+            tag: "오늘의 시 낭독 조각",
+            badge: "책갈피",
+            content: '"별 하나에 추억과, 별 하나에 사랑과, 별 하나에 쓸쓸함과, 별 하나에 시와..."',
+            recipient: "윤동주 · 별 헤는 밤 발췌",
+            status: "시선 머묾",
+            isMine: false
+          },
+          {
+            tag: "오늘의 시 낭독 조각",
+            badge: "책갈피",
+            content: '"별을 노래하는 마음으로 모든 죽어가는 것을 사랑해야지. 그리고 나한테 주어진 길을 걸어가야겠다."',
+            recipient: "윤동주 · 서시 발췌",
+            status: "시선 머묾",
+            isMine: false
+          },
+          {
+            tag: "오늘의 시 낭독 조각",
+            badge: "책갈피",
+            content: '"산에는 꽃 피네 꽃이 피네. 갈 봄 여름 없이 꽃이 피네. 산에 산에 피는 꽃은 저만치 혼자서 피어 있네."',
+            recipient: "김소월 · 산유화 발췌",
+            status: "시선 머묾",
+            isMine: false
+          }
+        ]
+      ];
+
+      // Staggered Asynchronous Cycle Times (between 8s and 10.2s)
+      const slotCycleDurations = [8500, 9800, 9100, 10200];
+      const slotStates = [
+        { poolIdx: 0, timer: null, isHovered: false, isFading: false },
+        { poolIdx: 0, timer: null, isHovered: false, isFading: false },
+        { poolIdx: 0, timer: null, isHovered: false, isFading: false },
+        { poolIdx: 0, timer: null, isHovered: false, isFading: false }
+      ];
+
+      const slotElements = [
+        document.getElementById('celestial-slot-1'),
+        document.getElementById('celestial-slot-2'),
+        document.getElementById('celestial-slot-3'),
+        document.getElementById('celestial-slot-4')
+      ];
+
+      let currentFilter = 'all'; // 'all' | 'mine'
+
+      function renderSlotCard(slotIdx, cardData) {
+        const num = slotIdx + 1;
+        const tagText = document.getElementById(`slot-${num}-tag-text`);
+        const badge = document.getElementById(`slot-${num}-badge`);
+        const content = document.getElementById(`slot-${num}-content`);
+        const recipient = document.getElementById(`slot-${num}-recipient`);
+        const status = document.getElementById(`slot-${num}-status`);
+        const tagDot = document.getElementById(`slot-${num}-tag-dot`);
+
+        if (tagText) tagText.textContent = cardData.tag;
+        if (badge) badge.textContent = cardData.badge;
+        if (content) content.textContent = cardData.content;
+        if (recipient) recipient.textContent = cardData.recipient;
+        if (status) status.textContent = cardData.status;
+
+        if (tagDot) {
+          tagDot.style.display = cardData.isMine ? 'inline-block' : 'none';
+        }
+      }
+
+      function triggerSlotCycle(slotIdx) {
+        const state = slotStates[slotIdx];
+        const el = slotElements[slotIdx];
+
+        if (!el || state.isHovered || state.isFading || currentFilter === 'mine') return;
+
+        state.isFading = true;
+        el.classList.add('celestial-fade-out');
+
+        // Smooth fade-out 1.8s
+        setTimeout(() => {
+          if (!el) return;
+          // Advance pool index
+          const pool = slotPools[slotIdx];
+          state.poolIdx = (state.poolIdx + 1) % pool.length;
+          renderSlotCard(slotIdx, pool[state.poolIdx]);
+
+          // Softly fade in
+          el.classList.remove('celestial-fade-out');
+          el.classList.add('celestial-fade-in');
+
+          setTimeout(() => {
+            state.isFading = false;
+          }, 1800);
+        }, 1800);
+      }
+
+      function startSlotTimer(slotIdx) {
+        if (slotStates[slotIdx].timer) clearInterval(slotStates[slotIdx].timer);
+        slotStates[slotIdx].timer = setInterval(() => {
+          triggerSlotCycle(slotIdx);
+        }, slotCycleDurations[slotIdx]);
+      }
+
+      // Initialize staggered asynchronous timers with gentle offset
+      slotElements.forEach((el, idx) => {
+        if (!el) return;
+
+        // Start each slot's interval
+        setTimeout(() => {
+          startSlotTimer(idx);
+        }, idx * 1200);
+
+        // Hover pause logic
+        el.addEventListener('mouseenter', () => {
+          slotStates[idx].isHovered = true;
+          if (slotStates[idx].timer) {
+            clearInterval(slotStates[idx].timer);
+            slotStates[idx].timer = null;
+          }
+        });
+
+        el.addEventListener('mouseleave', () => {
+          slotStates[idx].isHovered = false;
+          if (currentFilter === 'all') {
+            startSlotTimer(idx);
+          }
+        });
+      });
+
+      // Filter toggle handlers
+      const filterAll = document.getElementById('filter-all');
+      const filterMine = document.getElementById('filter-mine');
+      const orbitCycleBadge = document.getElementById('orbit-cycle-badge');
+
+      if (filterAll && filterMine) {
+        filterAll.addEventListener('click', () => {
+          currentFilter = 'all';
+          filterAll.classList.add('bg-[#F4C96B]', 'text-[#131B2E]', 'font-semibold');
+          filterAll.classList.remove('text-slate-300');
+          filterMine.classList.remove('bg-[#F4C96B]', 'text-[#131B2E]', 'font-semibold');
+          filterMine.classList.add('text-slate-300');
+
+          if (orbitCycleBadge) orbitCycleBadge.textContent = '자율 궤도 비행 중';
+
+          slotElements.forEach((el, idx) => {
+            if (el) {
+              el.style.display = '';
+              el.classList.remove('celestial-fade-out');
+              renderSlotCard(idx, slotPools[idx][slotStates[idx].poolIdx]);
+              startSlotTimer(idx);
+            }
+          });
+        });
+
+        filterMine.addEventListener('click', () => {
+          currentFilter = 'mine';
+          filterMine.classList.add('bg-[#F4C96B]', 'text-[#131B2E]', 'font-semibold');
+          filterMine.classList.remove('text-slate-300');
+          filterAll.classList.remove('bg-[#F4C96B]', 'text-[#131B2E]', 'font-semibold');
+          filterAll.classList.add('text-slate-300');
+
+          if (orbitCycleBadge) orbitCycleBadge.textContent = '나의 온기 쪽지 단독 유영';
+
+          // Clear all cycle timers
+          slotStates.forEach((state, i) => {
+            if (state.timer) clearInterval(state.timer);
+            state.timer = null;
+          });
+
+          // Slot 1 remains visible with user's note; others fade out softly
+          slotElements.forEach((el, idx) => {
+            if (!el) return;
+            if (idx === 0) {
+              renderSlotCard(0, slotPools[0][0]);
+              el.classList.remove('celestial-fade-out');
+            } else {
+              el.classList.add('celestial-fade-out');
+            }
+          });
+        });
+      }
+    })();
+  </script>
+</div></main><footer class="w-full bg-surface-container-low mt-space-xl"><div class="max-w-[1100px] mx-auto px-gutter py-space-xl flex flex-col md:flex-row items-baseline justify-between gap-space-lg"><div class="space-y-space-xs"><div class="font-title-md text-title-md text-on-surface">여백의 우체통</div><p class="font-body-sm text-body-sm text-tertiary max-w-md">서두르지 않는 마음으로 건네는 한 줄의 편지. 바쁜 일상에서 벗어나 사유와 쉼의 문장을 음미합니다.</p></div><div class="flex flex-col md:items-end gap-space-xs font-ui-label-sm text-ui-label-sm text-tertiary"><div class="flex gap-space-md"><a class="hover:text-primary transition-colors" href="#">이용약관</a><a class="hover:text-primary transition-colors" href="#">개인정보처리방침</a><a class="hover:text-primary transition-colors" href="#">편지 부치는 법</a></div><span class="tracking-wider">© 2024 Mailbox of Margin. All rights reserved.</span></div></div></footer>
+</body></html>
