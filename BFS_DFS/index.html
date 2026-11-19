@@ -1,608 +1,880 @@
 <!DOCTYPE html>
+<html lang="ko" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AlgoMaze Lab | BFS vs DFS 미로 탈출 시각화</title>
+  <!-- Google Fonts & Tailwind CDN & Chart.js -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ["Inter", "sans-serif"],
+            mono: ["JetBrains Mono", "monospace"]
+          },
+          colors: {
+            bgDark: "#0b1326",
+            cardDark: "#131b2e",
+            cardBorder: "#222a3d",
+            cyanAccent: "#38bdf8",
+            emeraldAccent: "#4edea3",
+            amberAccent: "#ffc174",
+            roseAccent: "#f43f5e"
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body { background-color: #0b1326; color: #dae2fd; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0b1326; }
+    ::-webkit-scrollbar-thumb { background: #222a3d; border-radius: 3px; }
+  </style>
+</head>
+<body class="font-sans antialiased min-h-screen flex flex-col">
 
-<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"primary-fixed":"#c4e7ff","tertiary-fixed":"#ffddb8","inverse-surface":"#dae2fd","on-secondary":"#003824","on-secondary-container":"#00311f","surface-bright":"#31394d","outline":"#87929a","on-secondary-fixed":"#002113","secondary-fixed":"#6ffbbe","secondary-container":"#00a572","inverse-primary":"#00668a","surface":"#0b1326","primary-fixed-dim":"#7bd0ff","inverse-on-surface":"#283044","surface-container":"#171f33","primary-container":"#38bdf8","on-surface-variant":"#bdc8d1","surface-container-low":"#131b2e","on-tertiary-fixed-variant":"#653e00","on-error-container":"#ffdad6","error":"#ffb4ab","surface-container-highest":"#2d3449","surface-dim":"#0b1326","on-background":"#dae2fd","secondary":"#4edea3","on-primary-container":"#004965","on-secondary-fixed-variant":"#005236","on-tertiary-container":"#613b00","on-error":"#690005","background":"#0b1326","on-tertiary-fixed":"#2a1700","on-surface":"#dae2fd","surface-container-lowest":"#060e20","tertiary":"#ffc174","tertiary-fixed-dim":"#ffb95f","on-primary-fixed":"#001e2c","on-primary-fixed-variant":"#004c69","surface-container-high":"#222a3d","surface-tint":"#7bd0ff","on-tertiary":"#472a00","on-primary":"#00354a","secondary-fixed-dim":"#4edea3","error-container":"#93000a","outline-variant":"#3e484f","tertiary-container":"#f59e0b","surface-variant":"#2d3449","primary":"#8ed5ff"},borderRadius:{DEFAULT:"0.125rem",lg:"0.25rem",xl:"0.5rem",full:"0.75rem"},spacing:{"space-lg":"1rem",margin:"1rem","space-xl":"1.5rem","space-sm":"0.5rem","gutter-desktop":"1.25rem","space-xs":"0.25rem","space-md":"0.75rem","margin-desktop":"1.5rem",gutter:"1rem"},fontFamily:{"label-mono":["JetBrains Mono"],"code-md":["JetBrains Mono"],"label-mono-sm":["JetBrains Mono"],"code-lg":["JetBrains Mono"],"body-lg":["Inter"],"body-md":["Inter"],"headline-md":["Inter"],"display-lg":["Inter"],"headline-sm":["Inter"],"body-sm":["Inter"]},fontSize:{"label-mono":["11px",{lineHeight:"14px",letterSpacing:"0.06em",fontWeight:"600"}],"code-md":["12px",{lineHeight:"16px",fontWeight:"500"}],"label-mono-sm":["10px",{lineHeight:"12px",letterSpacing:"0.08em",fontWeight:"500"}],"code-lg":["14px",{lineHeight:"20px",fontWeight:"500"}],"body-lg":["15px",{lineHeight:"22px",fontWeight:"400"}],"body-md":["13px",{lineHeight:"18px",fontWeight:"400"}],"headline-md":["20px",{lineHeight:"28px",letterSpacing:"-0.015em",fontWeight:"600"}],"display-lg":["32px",{lineHeight:"40px",letterSpacing:"-0.02em",fontWeight:"700"}],"headline-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.01em",fontWeight:"600"}],"body-sm":["12px",{lineHeight:"16px",fontWeight:"400"}]}}}};</script></head><body class="bg-surface font-body-md text-on-surface antialiased selection:bg-primary-container selection:text-on-primary-container"><header class="fixed top-0 left-0 right-0 h-14 bg-surface-container-lowest/90 backdrop-blur-xl z-50 shadow-[0_1px_8px_rgba(0,0,0,0.4)]"><div class="w-full h-14 px-gutter-desktop flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-md shrink-0"><div class="flex items-center gap-space-sm"><div class="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center shadow-inner"><span class="material-symbols-outlined text-primary text-[20px]">hub</span></div><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-on-surface tracking-tight leading-none">AlgoMaze Lab</span><span class="font-label-mono-sm text-label-mono-sm text-on-surface-variant uppercase tracking-wider mt-space-xs">Graph Maze Benchmark</span></div></div><div class="h-6 w-px bg-surface-container-highest mx-space-xs hidden sm:block"></div><div class="hidden lg:flex items-center gap-space-sm bg-surface-container-low px-space-md py-space-xs rounded-full shadow-[0_0_12px_rgba(78,222,163,0.08)]"><span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-secondary"></span></span><span class="font-label-mono text-label-mono text-on-surface">Connected</span><span class="font-label-mono-sm text-label-mono-sm text-on-surface-variant">WS: Active</span><span class="font-label-mono-sm text-label-mono-sm text-secondary bg-surface-container-high px-space-xs rounded">12ms</span></div></div><div class="flex items-center gap-space-sm shrink-0"><div class="flex items-center bg-surface-container-high p-space-xs rounded-xl"><button class="flex items-center gap-space-xs px-space-md py-space-xs rounded-lg bg-primary-container text-on-primary-container hover:brightness-110 active:scale-95 transition-all shadow-[0_0_16px_-2px_rgba(56,189,248,0.35)]" type="button"><span class="material-symbols-outlined text-[16px]">play_arrow</span><span class="font-label-mono text-label-mono">Run</span></button><button class="flex items-center gap-space-xs px-space-sm py-space-xs rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" type="button"><span class="material-symbols-outlined text-[16px]">pause</span></button><button class="flex items-center gap-space-xs px-space-sm py-space-xs rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" type="button"><span class="material-symbols-outlined text-[16px]">restart_alt</span></button><button class="flex items-center gap-space-xs px-space-sm py-space-xs rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" type="button"><span class="material-symbols-outlined text-[16px]">shuffle</span></button></div><div class="hidden xl:flex items-center gap-space-sm bg-surface-container-low px-space-md py-space-xs rounded-xl"><span class="font-label-mono-sm text-label-mono-sm text-on-surface-variant">SPEED</span><input class="w-20 h-1 bg-surface-container-highest rounded-lg appearance-none cursor-pointer accent-primary-container" max="100" min="1" type="range" value="65"/><span class="font-label-mono text-label-mono text-primary">65x</span></div><button class="hidden md:flex items-center gap-space-xs px-space-sm py-space-xs rounded-lg bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" type="button"><span class="material-symbols-outlined text-[16px]">step_over</span><span class="font-label-mono-sm text-label-mono-sm">Step</span></button><nav class="flex items-center bg-surface-container-lowest p-space-xs rounded-xl" data-active-classes="bg-surface-container-highest text-on-surface font-semibold shadow-inner"><a aria-current="page" class="px-space-md py-space-xs rounded-lg transition-colors bg-surface-container-highest text-on-surface font-semibold shadow-inner" data-path="dual-split-comparison" href="#">Dual Split</a><a class="px-space-md py-space-xs rounded-lg font-label-mono text-label-mono text-on-surface-variant hover:text-on-surface transition-colors" data-path="overlay-view" href="#">Overlay</a><a class="px-space-md py-space-xs rounded-lg font-label-mono text-label-mono text-on-surface-variant hover:text-on-surface transition-colors" data-path="code-telemetry-view" href="#">Code View</a></nav><div class="h-6 w-px bg-surface-container-highest mx-space-xs hidden sm:block"></div><div class="flex items-center gap-space-sm"><div class="hidden 2xl:flex flex-col text-right"><span class="font-label-mono text-label-mono text-on-surface">Session #8492</span><span class="font-label-mono-sm text-label-mono-sm text-tertiary">Memory 42.1 MB</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></div></header><aside class="fixed left-0 top-0 h-full w-64 bg-surface-container-lowest z-40 flex flex-col pt-20 pb-space-lg shadow-[1px_0_12px_rgba(0,0,0,0.35)]"><div class="px-space-lg mb-space-md"><span class="font-label-mono-sm text-label-mono-sm text-outline tracking-wider uppercase">Telemetry Modules</span></div><nav class="flex-1 px-space-md flex flex-col gap-space-xs" data-active-classes="bg-surface-container-high text-primary font-semibold"><a aria-current="page" class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg transition-all bg-surface-container-high text-primary font-semibold" data-path="dual-split-comparison" href="#"><span class="material-symbols-outlined text-[20px]">splitscreen</span><span class="font-body-md text-body-md">Dual Viewport</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="overlay-view" href="#"><span class="material-symbols-outlined text-[20px]">layers</span><span class="font-body-md text-body-md">Layered Trace</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="code-telemetry-view" href="#"><span class="material-symbols-outlined text-[20px]">terminal</span><span class="font-body-md text-body-md">Code &amp; State</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="benchmark-analytics" href="#"><span class="material-symbols-outlined text-[20px]">monitoring</span><span class="font-body-md text-body-md">Complexity Matrix</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="maze-generator-lab" href="#"><span class="material-symbols-outlined text-[20px]">grid_view</span><span class="font-body-md text-body-md">Maze Topology</span></a></nav><div class="px-space-md pt-space-md mt-auto"><div class="bg-surface-container-low p-space-md rounded-xl flex flex-col gap-space-xs"><div class="flex items-center justify-between"><span class="font-label-mono-sm text-label-mono-sm text-on-surface-variant">MEMORY POOL</span><span class="font-label-mono text-label-mono text-secondary">64%</span></div><div class="w-full h-1 bg-surface-container-highest rounded-full overflow-hidden"><div class="h-full bg-secondary w-2/3"></div></div><div class="flex justify-between font-label-mono-sm text-label-mono-sm text-outline mt-space-xs"><span>Heap: 384MB</span><span>Stack: 12KB</span></div></div></div></aside><div class="pl-64"><main class="relative pt-14 bg-surface min-h-screen"><div class="flex flex-col w-full">
-<!-- Interactive Canvas Backdrop & Ambient Grid Effect (Tailwind utility layer) -->
-<div class="p-gutter-desktop flex flex-col gap-space-lg w-full max-w-[1920px] mx-auto">
-<!-- TOP CONTROL & ORCHESTRATION STRIP -->
-<section class="bg-surface-container-low/90 backdrop-blur-md rounded-xl p-space-md shadow-xl flex flex-col xl:flex-row items-center justify-between gap-space-md">
-<!-- Cluster Left: Status & Engine Handshake -->
-<div class="flex flex-wrap items-center gap-space-md w-full xl:w-auto">
-<div class="flex items-center gap-space-xs bg-surface-container-lowest px-space-md py-space-xs rounded-lg shadow-inner">
-<span class="relative flex h-2.5 w-2.5">
-<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-80"></span>
-<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-secondary"></span>
-</span>
-<span class="font-label-mono text-label-mono text-on-surface">ENGINE SYNC</span>
-<span class="font-label-mono-sm text-label-mono-sm text-secondary bg-surface-container-high px-space-xs rounded">FASTAPI @main.py</span>
-<span class="font-label-mono-sm text-label-mono-sm text-tertiary bg-surface-container-high px-space-xs rounded">APPS SCRIPT @code.gs</span>
-</div>
-<div class="h-5 w-px bg-surface-container-highest hidden sm:block"></div>
-<!-- Maze Topology Specs -->
-<div class="flex items-center gap-space-xs font-label-mono-sm text-label-mono-sm text-on-surface-variant">
-<span class="text-outline uppercase">그리드 위상:</span>
-<span class="text-on-surface bg-surface-container px-space-xs rounded">25 × 25 Dense Lab</span>
-<span class="text-outline">|</span>
-<span class="text-outline uppercase">벽 생성:</span>
-<span class="text-primary-container">Recursive Division</span>
-</div>
-</div>
-<!-- Cluster Middle: Primary Action Rig -->
-<div class="flex items-center gap-space-xs">
-<button class="flex items-center gap-space-xs px-space-lg py-space-xs rounded-lg bg-primary-container text-on-primary-container hover:brightness-110 active:scale-95 transition-all shadow-[0_0_18px_rgba(56,189,248,0.4)]" id="btn-run" type="button">
-<span class="material-symbols-outlined text-[18px]">play_arrow</span>
-<span class="font-label-mono text-label-mono">동시 실행</span>
-</button>
-<button class="flex items-center gap-space-xs px-space-md py-space-xs rounded-lg bg-surface-container text-on-surface hover:bg-surface-container-high transition-all" id="btn-pause" type="button">
-<span class="material-symbols-outlined text-[18px]">pause</span>
-<span class="font-label-mono text-label-mono">일시 정지</span>
-</button>
-<button class="flex items-center gap-space-xs px-space-md py-space-xs rounded-lg bg-surface-container text-on-surface hover:bg-surface-container-high transition-all" id="btn-step" type="button">
-<span class="material-symbols-outlined text-[18px]">redo</span>
-<span class="font-label-mono text-label-mono">단일 스텝</span>
-</button>
-<button class="flex items-center gap-space-xs px-space-md py-space-xs rounded-lg bg-surface-container text-on-surface hover:bg-surface-container-high transition-all" id="btn-regenerate" type="button">
-<span class="material-symbols-outlined text-[18px]">cached</span>
-<span class="font-label-mono text-label-mono">미로 재생성</span>
-</button>
-</div>
-<!-- Cluster Right: Speed & Heuristic Tuning -->
-<div class="flex items-center gap-space-md w-full xl:w-auto justify-end">
-<div class="flex items-center gap-space-xs bg-surface-container-lowest px-space-sm py-space-xs rounded-lg">
-<span class="font-label-mono-sm text-label-mono-sm text-on-surface-variant">속도</span>
-<div class="flex gap-space-xs">
-<button class="px-space-xs py-0.5 rounded text-label-mono-sm font-label-mono text-on-surface-variant hover:text-on-surface">1x</button>
-<button class="px-space-xs py-0.5 rounded text-label-mono-sm font-label-mono bg-surface-container-highest text-primary">2x</button>
-<button class="px-space-xs py-0.5 rounded text-label-mono-sm font-label-mono text-on-surface-variant hover:text-on-surface">5x</button>
-<button class="px-space-xs py-0.5 rounded text-label-mono-sm font-label-mono text-secondary hover:text-secondary-fixed">MAX</button>
-</div>
-</div>
-<div class="flex items-center gap-space-xs bg-surface-container-lowest px-space-sm py-space-xs rounded-lg">
-<span class="font-label-mono-sm text-label-mono-sm text-on-surface-variant">가중치</span>
-<span class="font-label-mono-sm text-label-mono-sm text-secondary bg-surface-container-high px-space-xs rounded">동일(1.0)</span>
-</div>
-</div>
-</section>
-<!-- DUAL SPLIT-SCREEN MAIN CANVAS (50 / 50) -->
-<div class="grid grid-cols-1 xl:grid-cols-2 gap-gutter-desktop items-start w-full">
-<!-- ==================== LEFT VIEWPORT: BFS (Electric Cyan Theme) ==================== -->
-<div class="bg-surface-container-lowest/80 backdrop-blur-xl rounded-xl p-space-md shadow-2xl flex flex-col gap-space-md relative overflow-hidden">
-<!-- Visual Accent Bar -->
-<div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary-container via-primary to-surface-tint"></div>
-<!-- Engine Header -->
-<div class="flex items-center justify-between mt-space-xs">
-<div class="flex items-center gap-space-sm">
-<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary-container shadow-inner">
-<span class="material-symbols-outlined text-[20px]">waves</span>
-</div>
-<div>
-<div class="flex items-center gap-space-xs">
-<span class="font-headline-sm text-headline-sm text-on-surface">너비 우선 탐색</span>
-<span class="font-label-mono text-label-mono text-primary-container bg-surface-container-high px-space-xs rounded">BFS</span>
-</div>
-<span class="font-label-mono-sm text-label-mono-sm text-on-surface-variant">자료구조: FIFO 큐(Queue) · 최단 경로 보장 (Unweighted)</span>
-</div>
-</div>
-<div class="flex items-center gap-space-xs">
-<span class="inline-flex items-center px-space-sm py-space-xs rounded-full bg-surface-container-high font-label-mono text-label-mono text-primary">
-<span class="w-1.5 h-1.5 rounded-full bg-primary-container mr-1.5 animate-pulse"></span> 탐색 파동 전파 중
-            </span>
-</div>
-</div>
-<!-- Telemetry HUD Chips (BFS) -->
-<div class="grid grid-cols-3 gap-space-xs">
-<div class="bg-surface-container-low p-space-sm rounded-lg flex flex-col">
-<span class="font-label-mono-sm text-label-mono-sm text-outline">탐색 노드 수 (Visited)</span>
-<span class="font-label-mono text-headline-sm text-primary-container mt-space-xs font-bold" id="bfs-visited">184 <span class="text-label-mono-sm text-on-surface-variant">/ 625</span></span>
-</div>
-<div class="bg-surface-container-low p-space-sm rounded-lg flex flex-col">
-<span class="font-label-mono-sm text-label-mono-sm text-outline">현재 큐 크기 (Queue Size)</span>
-<span class="font-label-mono text-headline-sm text-primary mt-space-xs font-bold" id="bfs-queue-size">42 <span class="text-label-mono-sm text-on-surface-variant">Nodes</span></span>
-</div>
-<div class="bg-surface-container-low p-space-sm rounded-lg flex flex-col">
-<span class="font-label-mono-sm text-label-mono-sm text-outline">현재 탐색 레벨 (Radius)</span>
-<span class="font-label-mono text-headline-sm text-on-surface mt-space-xs font-bold">Lv. 19 <span class="text-label-mono-sm text-secondary">동심원</span></span>
-</div>
-</div>
-<!-- Maze Screen Simulation Frame: 25x25 Visual Map -->
-<div class="relative w-full aspect-square bg-surface-container-lowest rounded-lg overflow-hidden shadow-inner flex flex-col p-space-sm">
-<!-- Background Grid Raster -->
-<div class="w-full h-full grid grid-cols-25 gap-[1px] bg-surface-container-high/40 p-[2px] rounded select-none relative" style="grid-template-columns: repeat(25, minmax(0, 1fr));">
-<!-- Sample Maze generation snippet with visual states (25x25 layout) -->
-<!-- We generate visually distinct cells representing BFS frontier ripples, walls, and start/goal -->
-<!-- Start Node [S] -->
-<div class="col-start-2 row-start-2 z-10 bg-secondary flex items-center justify-center rounded-sm font-label-mono-sm text-[8px] font-bold text-on-secondary shadow-[0_0_12px_rgba(78,222,163,0.8)]">S</div>
-<!-- Goal Node [G] -->
-<div class="col-start-24 row-start-24 z-10 bg-tertiary flex items-center justify-center rounded-sm font-label-mono-sm text-[8px] font-bold text-on-tertiary shadow-[0_0_14px_rgba(255,193,116,0.8)] animate-pulse">G</div>
-<!-- Pre-rendered SVG overlays for glowing optimal path & frontier waves -->
-<svg class="absolute inset-0 w-full h-full pointer-events-none z-20" viewbox="0 0 500 500">
-<!-- BFS Wavefront Contour Rings (Concentric Isochrone circles) -->
-<circle class="text-primary-container/20" cx="30" cy="30" fill="none" r="120" stroke="currentColor" stroke-dasharray="4 4"></circle>
-<circle class="text-primary-container/25" cx="30" cy="30" fill="none" r="220" stroke="currentColor" stroke-dasharray="6 6"></circle>
-<circle class="text-primary/15" cx="30" cy="30" fill="none" r="320" stroke="currentColor" stroke-dasharray="4 4"></circle>
-<!-- Shortest Path Highlight (Electric Cyan Line) -->
-<path class="drop-shadow-[0_0_10px_rgba(56,189,248,0.9)]" d="M 30,30 L 70,30 L 70,70 L 110,70 L 110,130 L 170,130 L 170,190 L 210,190 L 210,230 L 270,230 L 270,290 L 330,290 L 330,350 L 390,350 L 390,410 L 450,410 L 470,470" fill="none" stroke="#38bdf8" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"></path>
-</svg>
-<!-- Dense Grid Nodes (Simulated static visualization with algorithmic distribution) -->
-<!-- Active Frontier Nodes (Bright Glow) -->
-<div class="col-start-14 row-start-15 bg-primary-container rounded-[1px] shadow-[0_0_8px_#38bdf8]"></div>
-<div class="col-start-15 row-start-15 bg-primary-container rounded-[1px] shadow-[0_0_8px_#38bdf8]"></div>
-<div class="col-start-16 row-start-14 bg-primary-container rounded-[1px] shadow-[0_0_8px_#38bdf8]"></div>
-<div class="col-start-13 row-start-16 bg-primary-container rounded-[1px] shadow-[0_0_8px_#38bdf8]"></div>
-<div class="col-start-17 row-start-13 bg-primary-container rounded-[1px] shadow-[0_0_8px_#38bdf8]"></div>
-<!-- Broad Dispersed Explored Zone (Radial Gradient feel) -->
-<div class="col-start-3 row-start-2 bg-primary/30 rounded-[1px]"></div>
-<div class="col-start-4 row-start-2 bg-primary/30 rounded-[1px]"></div>
-<div class="col-start-2 row-start-3 bg-primary/30 rounded-[1px]"></div>
-<div class="col-start-3 row-start-3 bg-primary/40 rounded-[1px]"></div>
-<div class="col-start-4 row-start-3 bg-primary/40 rounded-[1px]"></div>
-<div class="col-start-5 row-start-3 bg-primary/30 rounded-[1px]"></div>
-<div class="col-start-3 row-start-4 bg-primary/40 rounded-[1px]"></div>
-<div class="col-start-4 row-start-4 bg-primary/50 rounded-[1px]"></div>
-<div class="col-start-5 row-start-4 bg-primary/40 rounded-[1px]"></div>
-<div class="col-start-6 row-start-4 bg-primary/30 rounded-[1px]"></div>
-<div class="col-start-5 row-start-5 bg-primary/50 rounded-[1px]"></div>
-<div class="col-start-6 row-start-5 bg-primary/50 rounded-[1px]"></div>
-<div class="col-start-7 row-start-5 bg-primary/40 rounded-[1px]"></div>
-<div class="col-start-6 row-start-6 bg-primary/60 rounded-[1px]"></div>
-<div class="col-start-7 row-start-6 bg-primary/50 rounded-[1px]"></div>
-<div class="col-start-8 row-start-6 bg-primary/40 rounded-[1px]"></div>
-<div class="col-start-7 row-start-7 bg-primary/60 rounded-[1px]"></div>
-<div class="col-start-8 row-start-7 bg-primary/60 rounded-[1px]"></div>
-<div class="col-start-9 row-start-7 bg-primary/50 rounded-[1px]"></div>
-<div class="col-start-8 row-start-8 bg-primary/60 rounded-[1px]"></div>
-<div class="col-start-9 row-start-8 bg-primary/60 rounded-[1px]"></div>
-<div class="col-start-10 row-start-8 bg-primary/50 rounded-[1px]"></div>
-<div class="col-start-9 row-start-9 bg-primary/70 rounded-[1px]"></div>
-<div class="col-start-10 row-start-9 bg-primary/70 rounded-[1px]"></div>
-<div class="col-start-11 row-start-9 bg-primary/60 rounded-[1px]"></div>
-<div class="col-start-10 row-start-10 bg-primary/70 rounded-[1px]"></div>
-<div class="col-start-11 row-start-10 bg-primary/70 rounded-[1px]"></div>
-<div class="col-start-12 row-start-10 bg-primary/60 rounded-[1px]"></div>
-<div class="col-start-11 row-start-11 bg-primary/80 rounded-[1px]"></div>
-<div class="col-start-12 row-start-11 bg-primary/80 rounded-[1px]"></div>
-<div class="col-start-13 row-start-11 bg-primary/70 rounded-[1px]"></div>
-<div class="col-start-12 row-start-12 bg-primary/80 rounded-[1px]"></div>
-<div class="col-start-13 row-start-12 bg-primary/80 rounded-[1px]"></div>
-<div class="col-start-14 row-start-12 bg-primary/70 rounded-[1px]"></div>
-<!-- Wall Segments (Labyrinth Structure) -->
-<div class="col-start-1 row-start-1 bg-surface-container-highest"></div>
-<div class="col-start-5 row-start-1 bg-surface-container-highest"></div>
-<div class="col-start-5 row-start-2 bg-surface-container-highest"></div>
-<div class="col-start-7 row-start-2 bg-surface-container-highest"></div>
-<div class="col-start-7 row-start-3 bg-surface-container-highest"></div>
-<div class="col-start-7 row-start-4 bg-surface-container-highest"></div>
-<div class="col-start-2 row-start-6 bg-surface-container-highest"></div>
-<div class="col-start-3 row-start-6 bg-surface-container-highest"></div>
-<div class="col-start-4 row-start-6 bg-surface-container-highest"></div>
-<div class="col-start-9 row-start-3 bg-surface-container-highest"></div>
-<div class="col-start-9 row-start-4 bg-surface-container-highest"></div>
-<div class="col-start-9 row-start-5 bg-surface-container-highest"></div>
-<div class="col-start-12 row-start-4 bg-surface-container-highest"></div>
-<div class="col-start-12 row-start-5 bg-surface-container-highest"></div>
-<div class="col-start-12 row-start-6 bg-surface-container-highest"></div>
-<div class="col-start-12 row-start-7 bg-surface-container-highest"></div>
-<div class="col-start-15 row-start-8 bg-surface-container-highest"></div>
-<div class="col-start-15 row-start-9 bg-surface-container-highest"></div>
-<div class="col-start-15 row-start-10 bg-surface-container-highest"></div>
-<div class="col-start-17 row-start-7 bg-surface-container-highest"></div>
-<div class="col-start-17 row-start-8 bg-surface-container-highest"></div>
-<div class="col-start-17 row-start-9 bg-surface-container-highest"></div>
-<div class="col-start-8 row-start-14 bg-surface-container-highest"></div>
-<div class="col-start-9 row-start-14 bg-surface-container-highest"></div>
-<div class="col-start-10 row-start-14 bg-surface-container-highest"></div>
-<div class="col-start-18 row-start-16 bg-surface-container-highest"></div>
-<div class="col-start-19 row-start-16 bg-surface-container-highest"></div>
-<div class="col-start-20 row-start-16 bg-surface-container-highest"></div>
-<div class="col-start-22 row-start-19 bg-surface-container-highest"></div>
-<div class="col-start-22 row-start-20 bg-surface-container-highest"></div>
-<div class="col-start-22 row-start-21 bg-surface-container-highest"></div>
-</div>
-<!-- Bottom floating legend pill -->
-<div class="absolute bottom-space-md left-space-md bg-surface-container-lowest/90 backdrop-blur-md px-space-sm py-space-xs rounded-lg flex items-center gap-space-sm text-label-mono-sm font-label-mono">
-<span class="flex items-center gap-1"><span class="w-2 h-2 rounded bg-secondary"></span>시작[S]</span>
-<span class="flex items-center gap-1"><span class="w-2 h-2 rounded bg-tertiary"></span>도착[G]</span>
-<span class="flex items-center gap-1"><span class="w-2 h-2 rounded bg-primary-container shadow-[0_0_6px_#38bdf8]"></span>프론티어</span>
-<span class="flex items-center gap-1"><span class="w-2 h-2 rounded bg-primary/40"></span>동심 탐색 파면</span>
-</div>
-</div>
-<!-- Live Queue Inspector (FIFO Horizontal Stream Preview) -->
-<div class="bg-surface-container-low p-space-sm rounded-lg flex flex-col gap-space-xs">
-<div class="flex items-center justify-between">
-<div class="flex items-center gap-space-xs">
-<span class="material-symbols-outlined text-[16px] text-primary-container">arrow_forward</span>
-<span class="font-label-mono text-label-mono text-on-surface">FIFO 큐 파이프라인 (Active Deque / Enqueue)</span>
-</div>
-<span class="font-label-mono-sm text-label-mono-sm text-outline">Pop &lt;-- [Head] ... [Tail] &lt;-- Push</span>
-</div>
-<!-- Queue Node Stream Elements -->
-<div class="flex items-center gap-space-xs overflow-x-auto py-space-xs">
-<div class="shrink-0 bg-primary-container/20 border-primary-container text-primary-container px-space-sm py-space-xs rounded font-label-mono text-label-mono flex flex-col items-center shadow-[0_0_8px_rgba(56,189,248,0.3)]">
-<span class="text-[9px] text-outline">HEAD (POP)</span>
-<span>(14, 15)</span>
-</div>
-<span class="text-outline text-label-mono">&lt;</span>
-<div class="shrink-0 bg-surface-container-high px-space-sm py-space-xs rounded font-label-mono text-label-mono text-on-surface flex flex-col items-center">
-<span class="text-[9px] text-outline">IDX +1</span>
-<span>(15, 15)</span>
-</div>
-<span class="text-outline text-label-mono">&lt;</span>
-<div class="shrink-0 bg-surface-container-high px-space-sm py-space-xs rounded font-label-mono text-label-mono text-on-surface flex flex-col items-center">
-<span class="text-[9px] text-outline">IDX +2</span>
-<span>(16, 14)</span>
-</div>
-<span class="text-outline text-label-mono">&lt;</span>
-<div class="shrink-0 bg-surface-container-high px-space-sm py-space-xs rounded font-label-mono text-label-mono text-on-surface flex flex-col items-center">
-<span class="text-[9px] text-outline">IDX +3</span>
-<span>(13, 16)</span>
-</div>
-<span class="text-outline text-label-mono">&lt;</span>
-<div class="shrink-0 bg-surface-container-high px-space-sm py-space-xs rounded font-label-mono text-label-mono text-on-surface flex flex-col items-center">
-<span class="text-[9px] text-outline">IDX +4</span>
-<span>(17, 13)</span>
-</div>
-<span class="text-outline text-label-mono">&lt;</span>
-<div class="shrink-0 bg-surface-container-highest/60 text-outline px-space-sm py-space-xs rounded font-label-mono text-label-mono flex flex-col items-center">
-<span class="text-[9px] text-outline">TAIL (+37)</span>
-<span>(18, 12)</span>
-</div>
-</div>
-</div>
-<!-- Visited Nodes vs Distance Radial Spread Histogram -->
-<div class="bg-surface-container-low p-space-sm rounded-lg flex flex-col gap-space-xs">
-<div class="flex items-center justify-between font-label-mono-sm text-label-mono-sm">
-<span class="text-on-surface-variant">거리(Depth)별 탐색 노드 수포 (균등 방사형 확산)</span>
-<span class="text-primary-container">σ = 3.82 (정규 분포 곡선)</span>
-</div>
-<!-- Sparkline / Mini Bar Histogram -->
-<div class="h-10 w-full flex items-end gap-1 pt-1">
-<div class="w-full bg-primary-container/30 h-1 rounded-t"></div>
-<div class="w-full bg-primary-container/40 h-2 rounded-t"></div>
-<div class="w-full bg-primary-container/50 h-4 rounded-t"></div>
-<div class="w-full bg-primary-container/60 h-6 rounded-t"></div>
-<div class="w-full bg-primary-container/70 h-8 rounded-t"></div>
-<div class="w-full bg-primary-container h-10 rounded-t shadow-[0_0_8px_rgba(56,189,248,0.5)]"></div>
-<div class="w-full bg-primary-container/80 h-9 rounded-t"></div>
-<div class="w-full bg-primary-container/70 h-7 rounded-t"></div>
-<div class="w-full bg-primary-container/50 h-5 rounded-t"></div>
-<div class="w-full bg-primary-container/30 h-3 rounded-t"></div>
-<div class="w-full bg-primary-container/20 h-2 rounded-t"></div>
-<div class="w-full bg-primary-container/10 h-1 rounded-t"></div>
-</div>
-</div>
-</div>
-<!-- ==================== RIGHT VIEWPORT: DFS (Vibrant Emerald Theme) ==================== -->
-<div class="bg-surface-container-lowest/80 backdrop-blur-xl rounded-xl p-space-md shadow-2xl flex flex-col gap-space-md relative overflow-hidden">
-<!-- Visual Accent Bar -->
-<div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-secondary-container via-secondary to-secondary-fixed"></div>
-<!-- Engine Header -->
-<div class="flex items-center justify-between mt-space-xs">
-<div class="flex items-center gap-space-sm">
-<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-secondary shadow-inner">
-<span class="material-symbols-outlined text-[20px]">account_tree</span>
-</div>
-<div>
-<div class="flex items-center gap-space-xs">
-<span class="font-headline-sm text-headline-sm text-on-surface">깊이 우선 탐색</span>
-<span class="font-label-mono text-label-mono text-secondary bg-surface-container-high px-space-xs rounded">DFS</span>
-</div>
-<span class="font-label-mono-sm text-label-mono-sm text-on-surface-variant">자료구조: LIFO 스택(Stack) / 재귀 호출 · 심층 경로 우선 (비최적)</span>
-</div>
-</div>
-<div class="flex items-center gap-space-xs">
-<span class="inline-flex items-center px-space-sm py-space-xs rounded-full bg-surface-container-high font-label-mono text-label-mono text-secondary">
-<span class="w-1.5 h-1.5 rounded-full bg-secondary mr-1.5 animate-ping"></span> 분기 심층 침투 중
-            </span>
-</div>
-</div>
-<!-- Telemetry HUD Chips (DFS) -->
-<div class="grid grid-cols-3 gap-space-xs">
-<div class="bg-surface-container-low p-space-sm rounded-lg flex flex-col">
-<span class="font-label-mono-sm text-label-mono-sm text-outline">탐색 노드 수 (Visited)</span>
-<span class="font-label-mono text-headline-sm text-secondary mt-space-xs font-bold" id="dfs-visited">312 <span class="text-label-mono-sm text-on-surface-variant">/ 625</span></span>
-</div>
-<div class="bg-surface-container-low p-space-sm rounded-lg flex flex-col">
-<span class="font-label-mono-sm text-label-mono-sm text-outline">호출 스택 정점 (Stack Peak)</span>
-<span class="font-label-mono text-headline-sm text-secondary-fixed mt-space-xs font-bold" id="dfs-stack-depth">78 <span class="text-label-mono-sm text-on-surface-variant">Frames</span></span>
-</div>
-<div class="bg-surface-container-low p-space-sm rounded-lg flex flex-col">
-<span class="font-label-mono-sm text-label-mono-sm text-outline">백트래킹 발생 (Backtracks)</span>
-<span class="font-label-mono text-headline-sm text-tertiary mt-space-xs font-bold">47 <span class="text-label-mono-sm text-error">Rebounds</span></span>
-</div>
-</div>
-<!-- Maze Screen Simulation Frame: 25x25 Visual Map (DFS Matching Topology) -->
-<div class="relative w-full aspect-square bg-surface-container-lowest rounded-lg overflow-hidden shadow-inner flex flex-col p-space-sm">
-<!-- Identical 25x25 Wall Structure for Pure Scientific Parity -->
-<div class="w-full h-full grid grid-cols-25 gap-[1px] bg-surface-container-high/40 p-[2px] rounded select-none relative" style="grid-template-columns: repeat(25, minmax(0, 1fr));">
-<!-- Start Node [S] -->
-<div class="col-start-2 row-start-2 z-10 bg-secondary flex items-center justify-center rounded-sm font-label-mono-sm text-[8px] font-bold text-on-secondary shadow-[0_0_12px_rgba(78,222,163,0.8)]">S</div>
-<!-- Goal Node [G] -->
-<div class="col-start-24 row-start-24 z-10 bg-tertiary flex items-center justify-center rounded-sm font-label-mono-sm text-[8px] font-bold text-on-tertiary shadow-[0_0_14px_rgba(255,193,116,0.8)] animate-pulse">G</div>
-<!-- Pre-rendered SVG overlays for Snake-like single probe & dead-end branches -->
-<svg class="absolute inset-0 w-full h-full pointer-events-none z-20" viewbox="0 0 500 500">
-<!-- Backtracked Dead Ends (Subtle dashed maroon/faded lines) -->
-<path d="M 30,30 L 30,110 L 70,110 L 70,150 L 30,150 L 30,230" fill="none" opacity="0.6" stroke="#93000a" stroke-dasharray="3 3" stroke-width="2.5"></path>
-<path d="M 110,70 L 110,30 L 230,30 L 230,90" fill="none" opacity="0.6" stroke="#93000a" stroke-dasharray="3 3" stroke-width="2.5"></path>
-<path d="M 170,130 L 170,170 L 130,170 L 130,270 L 170,270 L 170,350 L 90,350" fill="none" opacity="0.6" stroke="#93000a" stroke-dasharray="3 3" stroke-width="2.5"></path>
-<!-- Deep Probing Trail (Winding Emerald Path to Goal - 94 Steps Detour) -->
-<path class="drop-shadow-[0_0_12px_rgba(78,222,163,0.9)]" d="M 30,30 L 70,30 L 70,70 L 110,70 L 170,70 L 170,130 L 250,130 L 250,90 L 330,90 L 330,170 L 290,170 L 290,270 L 370,270 L 370,210 L 430,210 L 430,310 L 370,310 L 370,410 L 450,410 L 470,470" fill="none" stroke="#4edea3" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"></path>
-</svg>
-<!-- DFS Snake Head Probe Point (Bright Glow) -->
-<div class="col-start-23 row-start-23 bg-secondary rounded-[1px] shadow-[0_0_12px_#4edea3] animate-ping"></div>
-<!-- Dead end nodes markers -->
-<div class="col-start-2 row-start-12 bg-error-container/60 rounded-[1px]"></div>
-<div class="col-start-7 row-start-18 bg-error-container/60 rounded-[1px]"></div>
-<div class="col-start-12 row-start-2 bg-error-container/60 rounded-[1px]"></div>
-<!-- Dense Visited Stack Node cells along the long winding trail -->
-<div class="col-start-4 row-start-2 bg-secondary/30 rounded-[1px]"></div>
-<div class="col-start-6 row-start-4 bg-secondary/40 rounded-[1px]"></div>
-<div class="col-start-9 row-start-4 bg-secondary/40 rounded-[1px]"></div>
-<div class="col-start-13 row-start-7 bg-secondary/50 rounded-[1px]"></div>
-<div class="col-start-17 row-start-11 bg-secondary/50 rounded-[1px]"></div>
-<div class="col-start-15 row-start-14 bg-secondary/60 rounded-[1px]"></div>
-<div class="col-start-19 row-start-14 bg-secondary/60 rounded-[1px]"></div>
-<div class="col-start-21 row-start-11 bg-secondary/70 rounded-[1px]"></div>
-<div class="col-start-22 row-start-15 bg-secondary/80 rounded-[1px]"></div>
-<!-- Walls strictly duplicated for 1:1 test validity -->
-<div class="col-start-1 row-start-1 bg-surface-container-highest"></div>
-<div class="col-start-5 row-start-1 bg-surface-container-highest"></div>
-<div class="col-start-5 row-start-2 bg-surface-container-highest"></div>
-<div class="col-start-7 row-start-2 bg-surface-container-highest"></div>
-<div class="col-start-7 row-start-3 bg-surface-container-highest"></div>
-<div class="col-start-7 row-start-4 bg-surface-container-highest"></div>
-<div class="col-start-2 row-start-6 bg-surface-container-highest"></div>
-<div class="col-start-3 row-start-6 bg-surface-container-highest"></div>
-<div class="col-start-4 row-start-6 bg-surface-container-highest"></div>
-<div class="col-start-9 row-start-3 bg-surface-container-highest"></div>
-<div class="col-start-9 row-start-4 bg-surface-container-highest"></div>
-<div class="col-start-9 row-start-5 bg-surface-container-highest"></div>
-<div class="col-start-12 row-start-4 bg-surface-container-highest"></div>
-<div class="col-start-12 row-start-5 bg-surface-container-highest"></div>
-<div class="col-start-12 row-start-6 bg-surface-container-highest"></div>
-<div class="col-start-12 row-start-7 bg-surface-container-highest"></div>
-<div class="col-start-15 row-start-8 bg-surface-container-highest"></div>
-<div class="col-start-15 row-start-9 bg-surface-container-highest"></div>
-<div class="col-start-15 row-start-10 bg-surface-container-highest"></div>
-<div class="col-start-17 row-start-7 bg-surface-container-highest"></div>
-<div class="col-start-17 row-start-8 bg-surface-container-highest"></div>
-<div class="col-start-17 row-start-9 bg-surface-container-highest"></div>
-<div class="col-start-8 row-start-14 bg-surface-container-highest"></div>
-<div class="col-start-9 row-start-14 bg-surface-container-highest"></div>
-<div class="col-start-10 row-start-14 bg-surface-container-highest"></div>
-<div class="col-start-18 row-start-16 bg-surface-container-highest"></div>
-<div class="col-start-19 row-start-16 bg-surface-container-highest"></div>
-<div class="col-start-20 row-start-16 bg-surface-container-highest"></div>
-<div class="col-start-22 row-start-19 bg-surface-container-highest"></div>
-<div class="col-start-22 row-start-20 bg-surface-container-highest"></div>
-<div class="col-start-22 row-start-21 bg-surface-container-highest"></div>
-</div>
-<!-- Bottom floating legend pill -->
-<div class="absolute bottom-space-md left-space-md bg-surface-container-lowest/90 backdrop-blur-md px-space-sm py-space-xs rounded-lg flex items-center gap-space-sm text-label-mono-sm font-label-mono">
-<span class="flex items-center gap-1"><span class="w-2 h-2 rounded bg-secondary"></span>시작[S]</span>
-<span class="flex items-center gap-1"><span class="w-2 h-2 rounded bg-tertiary"></span>도착[G]</span>
-<span class="flex items-center gap-1"><span class="w-2 h-2 rounded bg-secondary shadow-[0_0_6px_#4edea3]"></span>선두 프로브</span>
-<span class="flex items-center gap-1"><span class="w-2 h-2 rounded bg-error-container"></span>백트랙 막다른 골목</span>
-</div>
-</div>
-<!-- Live Stack Inspector (LIFO Call Stack Preview) -->
-<div class="bg-surface-container-low p-space-sm rounded-lg flex flex-col gap-space-xs">
-<div class="flex items-center justify-between">
-<div class="flex items-center gap-space-xs">
-<span class="material-symbols-outlined text-[16px] text-secondary">layers</span>
-<span class="font-label-mono text-label-mono text-on-surface">LIFO 콜 스택 프레임 (Call Stack Trace)</span>
-</div>
-<span class="font-label-mono-sm text-label-mono-sm text-outline">Top: Node &lt;-- Push/Pop</span>
-</div>
-<!-- Stack Nodes Stream (Vertical/Horizontal hybrid tape) -->
-<div class="flex items-center gap-space-xs overflow-x-auto py-space-xs">
-<div class="shrink-0 bg-secondary/20 border-secondary text-secondary px-space-sm py-space-xs rounded font-label-mono text-label-mono flex flex-col items-center shadow-[0_0_8px_rgba(78,222,163,0.3)]">
-<span class="text-[9px] text-outline">TOP (FRAME #78)</span>
-<span>(23, 23)</span>
-</div>
-<span class="text-outline text-label-mono">&lt;-</span>
-<div class="shrink-0 bg-surface-container-high px-space-sm py-space-xs rounded font-label-mono text-label-mono text-on-surface flex flex-col items-center">
-<span class="text-[9px] text-outline">FRAME #77</span>
-<span>(23, 22)</span>
-</div>
-<span class="text-outline text-label-mono">&lt;-</span>
-<div class="shrink-0 bg-surface-container-high px-space-sm py-space-xs rounded font-label-mono text-label-mono text-on-surface flex flex-col items-center">
-<span class="text-[9px] text-outline">FRAME #76</span>
-<span>(23, 21)</span>
-</div>
-<span class="text-outline text-label-mono">&lt;-</span>
-<div class="shrink-0 bg-surface-container-high px-space-sm py-space-xs rounded font-label-mono text-label-mono text-on-surface flex flex-col items-center">
-<span class="text-[9px] text-outline">FRAME #75</span>
-<span>(22, 21)</span>
-</div>
-<span class="text-outline text-label-mono">&lt;-</span>
-<div class="shrink-0 bg-surface-container-high px-space-sm py-space-xs rounded font-label-mono text-label-mono text-on-surface flex flex-col items-center">
-<span class="text-[9px] text-outline">FRAME #74</span>
-<span>(21, 21)</span>
-</div>
-<span class="text-outline text-label-mono">&lt;-</span>
-<div class="shrink-0 bg-surface-container-highest/60 text-outline px-space-sm py-space-xs rounded font-label-mono text-label-mono flex flex-col items-center">
-<span class="text-[9px] text-outline">BASE (0,0)</span>
-<span>#01 Frame</span>
-</div>
-</div>
-</div>
-<!-- Branch Depth Distribution Bar Chart -->
-<div class="bg-surface-container-low p-space-sm rounded-lg flex flex-col gap-space-xs">
-<div class="flex items-center justify-between font-label-mono-sm text-label-mono-sm">
-<span class="text-on-surface-variant">분기 심층 관통 깊이 (극단적 스파이크 형태)</span>
-<span class="text-secondary">Peak = 78 Nodes (우회 탐색)</span>
-</div>
-<!-- Histogram: High spikes showing tunnel depth -->
-<div class="h-10 w-full flex items-end gap-1 pt-1">
-<div class="w-full bg-secondary/30 h-8 rounded-t"></div>
-<div class="w-full bg-secondary/40 h-3 rounded-t"></div>
-<div class="w-full bg-secondary/30 h-10 rounded-t"></div>
-<div class="w-full bg-secondary/50 h-4 rounded-t"></div>
-<div class="w-full bg-secondary/40 h-2 rounded-t"></div>
-<div class="w-full bg-secondary/70 h-9 rounded-t"></div>
-<div class="w-full bg-secondary h-10 rounded-t shadow-[0_0_8px_rgba(78,222,163,0.5)]"></div>
-<div class="w-full bg-secondary/50 h-5 rounded-t"></div>
-<div class="w-full bg-secondary/80 h-9 rounded-t"></div>
-<div class="w-full bg-secondary/30 h-2 rounded-t"></div>
-<div class="w-full bg-secondary/60 h-7 rounded-t"></div>
-<div class="w-full bg-secondary/20 h-4 rounded-t"></div>
-</div>
-</div>
-</div>
-</div>
-<!-- BOTTOM TELEMETRY & EMPIRICAL BENCHMARK MATRIX -->
-<section class="bg-surface-container-low/80 backdrop-blur-md rounded-xl p-space-md shadow-2xl flex flex-col gap-space-md">
-<!-- Section Title & Status Strip -->
-<div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-space-sm">
-<div class="flex items-center gap-space-sm">
-<span class="material-symbols-outlined text-primary text-[20px]">analytics</span>
-<span class="font-headline-sm text-headline-sm text-on-surface">실시간 벤치마크 텔레메트리 (Empirical Complexity Matrix)</span>
-</div>
-<div class="flex flex-wrap items-center gap-space-xs font-label-mono-sm text-label-mono-sm">
-<span class="bg-surface-container px-space-xs py-0.5 rounded text-outline">LOG PROTOCOL:</span>
-<span class="text-secondary bg-surface-container-high px-space-xs py-0.5 rounded">WebSocket: ws://127.0.0.1:8000/ws/eval</span>
-<span class="text-tertiary bg-surface-container-high px-space-xs py-0.5 rounded">Sheets API v4 Sync</span>
-</div>
-</div>
-<!-- 4 High-Fidelity Comparison Metric Cards -->
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md">
-<!-- Card 1: Operations / Visited Nodes -->
-<div class="bg-surface-container rounded-lg p-space-md flex flex-col gap-space-xs shadow-md">
-<div class="flex items-center justify-between">
-<span class="font-label-mono-sm text-label-mono-sm text-outline uppercase">총 탐색 노드 수</span>
-<span class="font-label-mono-sm text-label-mono-sm bg-primary-container/20 text-primary-container px-space-xs rounded">연산량 효율</span>
-</div>
-<div class="flex items-baseline justify-between mt-space-xs">
-<div class="flex flex-col">
-<span class="font-label-mono-sm text-label-mono-sm text-primary">BFS (너비)</span>
-<span class="font-label-mono text-headline-md font-bold text-on-surface">184 <span class="text-label-mono-sm text-outline">노드</span></span>
-</div>
-<div class="flex flex-col text-right">
-<span class="font-label-mono-sm text-label-mono-sm text-secondary">DFS (깊이)</span>
-<span class="font-label-mono text-headline-md font-bold text-on-surface">312 <span class="text-label-mono-sm text-outline">노드</span></span>
-</div>
-</div>
-<!-- Progress comparison bar -->
-<div class="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden flex mt-space-xs">
-<div class="h-full bg-primary-container w-[37%]"></div>
-<div class="h-full bg-secondary w-[63%]"></div>
-</div>
-<span class="font-label-mono-sm text-label-mono-sm text-secondary mt-space-xs">BFS가 41.0% 적은 영역 탐색으로 목표 도달</span>
-</div>
-<!-- Card 2: Execution Time (ms) -->
-<div class="bg-surface-container rounded-lg p-space-md flex flex-col gap-space-xs shadow-md">
-<div class="flex items-center justify-between">
-<span class="font-label-mono-sm text-label-mono-sm text-outline uppercase">소수점 정밀 소요 시간</span>
-<span class="font-label-mono-sm text-label-mono-sm bg-secondary/20 text-secondary px-space-xs rounded">실행 속도</span>
-</div>
-<div class="flex items-baseline justify-between mt-space-xs">
-<div class="flex flex-col">
-<span class="font-label-mono-sm text-label-mono-sm text-primary">BFS Latency</span>
-<span class="font-label-mono text-headline-md font-bold text-on-surface">42.18 <span class="text-label-mono-sm text-outline">ms</span></span>
-</div>
-<div class="flex flex-col text-right">
-<span class="font-label-mono-sm text-label-mono-sm text-secondary">DFS Latency</span>
-<span class="font-label-mono text-headline-md font-bold text-secondary">28.45 <span class="text-label-mono-sm text-outline">ms</span></span>
-</div>
-</div>
-<!-- Progress comparison bar -->
-<div class="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden flex mt-space-xs">
-<div class="h-full bg-primary-container w-[60%]"></div>
-<div class="h-full bg-secondary w-[40%]"></div>
-</div>
-<span class="font-label-mono-sm text-label-mono-sm text-on-surface-variant mt-space-xs">DFS가 큐 관리 오버헤드가 적어 단기 속도 우세</span>
-</div>
-<!-- Card 3: Final Path Length -->
-<div class="bg-surface-container rounded-lg p-space-md flex flex-col gap-space-xs shadow-md">
-<div class="flex items-center justify-between">
-<span class="font-label-mono-sm text-label-mono-sm text-outline uppercase">최종 탈출 경로 길이</span>
-<span class="font-label-mono-sm text-label-mono-sm bg-tertiary-container/30 text-tertiary px-space-xs rounded">최적성 (Optimality)</span>
-</div>
-<div class="flex items-baseline justify-between mt-space-xs">
-<div class="flex flex-col">
-<span class="font-label-mono-sm text-label-mono-sm text-primary">BFS 최단 경로</span>
-<span class="font-label-mono text-headline-md font-bold text-primary-container">38 <span class="text-label-mono-sm text-outline">칸 (최적)</span></span>
-</div>
-<div class="flex flex-col text-right">
-<span class="font-label-mono-sm text-label-mono-sm text-secondary">DFS 우회 경로</span>
-<span class="font-label-mono text-headline-md font-bold text-error">94 <span class="text-label-mono-sm text-outline">칸 (비최적)</span></span>
-</div>
-</div>
-<!-- Visual indicator -->
-<div class="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden flex mt-space-xs">
-<div class="h-full bg-primary-container w-[28%]"></div>
-<div class="h-full bg-error w-[72%]"></div>
-</div>
-<span class="font-label-mono-sm text-label-mono-sm text-primary-container mt-space-xs">BFS 최단 경로 보장 (DFS 대비 59.5% 짧은 경로)</span>
-</div>
-<!-- Card 4: Peak Memory & Data Structure Complexity -->
-<div class="bg-surface-container rounded-lg p-space-md flex flex-col gap-space-xs shadow-md">
-<div class="flex items-center justify-between">
-<span class="font-label-mono-sm text-label-mono-sm text-outline uppercase">최대 메모리 공간 복잡도</span>
-<span class="font-label-mono-sm text-label-mono-sm bg-surface-container-highest text-on-surface px-space-xs rounded">Space O(V)</span>
-</div>
-<div class="flex items-baseline justify-between mt-space-xs">
-<div class="flex flex-col">
-<span class="font-label-mono-sm text-label-mono-sm text-primary">Peak Queue</span>
-<span class="font-label-mono text-headline-md font-bold text-on-surface">42 <span class="text-label-mono-sm text-outline">노드</span></span>
-</div>
-<div class="flex flex-col text-right">
-<span class="font-label-mono-sm text-label-mono-sm text-secondary">Peak Stack</span>
-<span class="font-label-mono text-headline-md font-bold text-on-surface">78 <span class="text-label-mono-sm text-outline">프레임</span></span>
-</div>
-</div>
-<!-- Progress comparison bar -->
-<div class="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden flex mt-space-xs">
-<div class="h-full bg-primary-container w-[35%]"></div>
-<div class="h-full bg-secondary w-[65%]"></div>
-</div>
-<span class="font-label-mono-sm text-label-mono-sm text-outline mt-space-xs">BFS: O(V) 큐 메모리 | DFS: O(h) 재귀 깊이 의존</span>
-</div>
-</div>
-<!-- Live Code Engine Terminal Sync Log -->
-<div class="bg-surface-container-lowest p-space-md rounded-lg flex flex-col lg:flex-row items-start lg:items-center justify-between gap-space-md">
-<div class="flex items-center gap-space-sm font-label-mono-sm text-label-mono-sm">
-<span class="material-symbols-outlined text-secondary text-[16px]">terminal</span>
-<span class="text-outline font-label-mono">RPC_STDOUT:</span>
-<span class="text-on-surface">`FastAPI-Worker: BFS queue expanded [184 visited]. DFS call_stack reached peak [78 frames]. Metrics pushed to Google Apps Script.`</span>
-</div>
-<div class="flex items-center gap-space-sm shrink-0">
-<span class="font-label-mono-sm text-label-mono-sm text-outline">EXPORT DATA:</span>
-<button class="px-space-sm py-space-xs rounded bg-surface-container text-on-surface hover:bg-surface-container-high font-label-mono-sm text-label-mono-sm transition-all flex items-center gap-1" type="button">
-<span class="material-symbols-outlined text-[14px]">table_view</span>
-            Google Sheets Log
-          </button>
-<button class="px-space-sm py-space-xs rounded bg-surface-container text-on-surface hover:bg-surface-container-high font-label-mono-sm text-label-mono-sm transition-all flex items-center gap-1" type="button">
-<span class="material-symbols-outlined text-[14px]">download</span>
-            JSON Benchmark Dump
-          </button>
-</div>
-</div>
-</section>
-</div>
-</div>
-<script>
-  // Micro-interaction handlers for interactive prototype demonstration
-  document.getElementById('btn-run')?.addEventListener('click', function() {
-    this.classList.toggle('brightness-125');
-    const bfsVisited = document.getElementById('bfs-visited');
-    const dfsVisited = document.getElementById('dfs-visited');
-    if (bfsVisited && dfsVisited) {
-      // Small simulated tick increment to show kinetic state
-      const currentBfs = parseInt(bfsVisited.textContent) || 184;
-      const currentDfs = parseInt(dfsVisited.textContent) || 312;
-      bfsVisited.innerHTML = (currentBfs + 1) + ' <span class="text-label-mono-sm text-on-surface-variant">/ 625</span>';
-      dfsVisited.innerHTML = (currentDfs + 2) + ' <span class="text-label-mono-sm text-on-surface-variant">/ 625</span>';
-    }
-  });
+  <!-- 상단 네비게이션 헤더 (Stitch 테마) -->
+  <header class="h-14 border-b border-cardBorder bg-[#060e20]/90 backdrop-blur-md px-6 flex items-center justify-between sticky top-0 z-50">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg bg-cardBorder flex items-center justify-center text-cyanAccent shadow-inner">
+        <span class="material-symbols-outlined text-[20px]">hub</span>
+      </div>
+      <div>
+        <h1 class="font-bold text-sm tracking-tight text-white flex items-center gap-2">
+          AlgoMaze Lab <span class="text-xs px-2 py-0.5 rounded-full bg-cyanAccent/10 text-cyanAccent border border-cyanAccent/20">BFS vs DFS</span>
+        </h1>
+        <p class="text-[10px] text-slate-400 font-mono">Queue(FIFO) vs Stack(LIFO) 탐색 경로 & 히스토그램 벤치마크</p>
+      </div>
+    </div>
 
-  document.getElementById('btn-regenerate')?.addEventListener('click', function() {
-    const icon = this.querySelector('.material-symbols-outlined');
-    if (icon) {
-      icon.classList.add('animate-spin');
-      setTimeout(() => {
-        icon.classList.remove('animate-spin');
-      }, 600);
+    <!-- 연결 상태 및 복잡도 인디케이터 -->
+    <div class="flex items-center gap-4 text-xs font-mono">
+      <div class="flex items-center gap-2 bg-cardDark px-3 py-1.5 rounded-full border border-cardBorder">
+        <span class="relative flex h-2 w-2">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emeraldAccent opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-emeraldAccent"></span>
+        </span>
+        <span id="txt-engine-status" class="text-slate-300">GAS Backend: Active</span>
+      </div>
+      <div class="hidden md:flex items-center gap-2 text-slate-400">
+        <span>시간복잡도: <strong class="text-cyanAccent">O(V + E)</strong></span>
+      </div>
+    </div>
+  </header>
+
+  <!-- 메인 제어 바 (Control Toolbar) -->
+  <section class="border-b border-cardBorder bg-cardDark/60 px-6 py-3 flex flex-wrap items-center justify-between gap-4">
+    <div class="flex items-center gap-2">
+      <!-- 실행 / 일시정지 -->
+      <button id="btn-play-pause" class="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-cyanAccent text-slate-950 font-semibold text-xs hover:bg-cyan-300 transition-all shadow-[0_0_12px_rgba(56,189,248,0.25)]">
+        <span class="material-symbols-outlined text-[16px]">play_arrow</span>
+        <span id="txt-play-pause">동시 실행</span>
+      </button>
+
+      <!-- 단일 스텝 전진 -->
+      <button id="btn-step" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cardBorder text-slate-200 text-xs hover:bg-slate-700 transition-all">
+        <span class="material-symbols-outlined text-[16px]">step_over</span>
+        <span>스텝 전진</span>
+      </button>
+
+      <!-- 리셋 -->
+      <button id="btn-reset" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cardBorder text-slate-200 text-xs hover:bg-slate-700 transition-all">
+        <span class="material-symbols-outlined text-[16px]">restart_alt</span>
+        <span>초기화</span>
+      </button>
+
+      <!-- 미로 새로 생성 -->
+      <button id="btn-regenerate" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cardBorder text-slate-200 text-xs hover:bg-slate-700 transition-all">
+        <span class="material-symbols-outlined text-[16px]">shuffle</span>
+        <span>미로 재생성</span>
+      </button>
+    </div>
+
+    <!-- 미로 크기 및 속도 조절 -->
+    <div class="flex items-center gap-6 text-xs font-mono">
+      <div class="flex items-center gap-2">
+        <span class="text-slate-400">격자 크기:</span>
+        <select id="sel-size" class="bg-cardDark border border-cardBorder rounded px-2 py-1 text-slate-200 focus:outline-none focus:border-cyanAccent">
+          <option value="11">11 x 11 (소형)</option>
+          <option value="15" selected>15 x 15 (표준)</option>
+          <option value="21">21 x 21 (대형)</option>
+        </select>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <span class="text-slate-400">속도:</span>
+        <input id="slider-speed" type="range" min="1" max="10" value="5" class="w-24 accent-cyanAccent cursor-pointer" />
+        <span id="txt-speed" class="text-cyanAccent w-8">5x</span>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <span class="text-slate-400">현재 스텝:</span>
+        <span id="txt-step-counter" class="text-white font-bold bg-cardBorder px-2.5 py-0.5 rounded">0</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 대시보드 메인 본문 (Dual Viewport & Histograms) -->
+  <main class="flex-1 p-6 flex flex-col gap-6 max-w-7xl mx-auto w-full">
+
+    <!-- 상단: 듀얼 미로 뷰포트 (좌: BFS vs 우: DFS) -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+      <!-- BFS 미로 카드 -->
+      <div class="bg-cardDark border border-cardBorder rounded-xl p-5 flex flex-col gap-4 shadow-lg">
+        <div class="flex items-center justify-between border-b border-cardBorder pb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-cyanAccent"></span>
+            <h2 class="font-bold text-sm text-white">너비 우선 탐색 (BFS)</h2>
+            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-cyanAccent/10 text-cyanAccent">Queue (FIFO)</span>
+          </div>
+          <span id="bfs-status-badge" class="text-xs font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300">대기 중</span>
+        </div>
+
+        <!-- 미로 캔버스 -->
+        <div class="flex justify-center items-center bg-[#060e20] p-3 rounded-lg border border-cardBorder relative">
+          <canvas id="canvas-bfs" width="360" height="360" class="rounded"></canvas>
+          <div id="bfs-overlay-result" class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm rounded flex flex-col items-center justify-center gap-2 hidden">
+            <span class="material-symbols-outlined text-cyanAccent text-4xl">check_circle</span>
+            <span class="text-white font-bold text-sm">최단 경로 탐색 완료!</span>
+            <span id="bfs-result-meta" class="text-xs text-slate-300 font-mono"></span>
+          </div>
+        </div>
+
+        <!-- BFS 실시간 메타데이터 & 큐 상태 -->
+        <div class="grid grid-cols-3 gap-2 text-xs font-mono">
+          <div class="bg-cardBorder/40 p-2.5 rounded border border-cardBorder">
+            <span class="text-slate-400 block text-[10px]">방문 노드 수 (Visited)</span>
+            <strong id="bfs-visited-val" class="text-cyanAccent text-sm">0</strong>
+          </div>
+          <div class="bg-cardBorder/40 p-2.5 rounded border border-cardBorder">
+            <span class="text-slate-400 block text-[10px]">Queue 대기 크기</span>
+            <strong id="bfs-queue-val" class="text-emeraldAccent text-sm">0</strong>
+          </div>
+          <div class="bg-cardBorder/40 p-2.5 rounded border border-cardBorder">
+            <span class="text-slate-400 block text-[10px]">최단 경로 길이</span>
+            <strong id="bfs-path-val" class="text-white text-sm">-</strong>
+          </div>
+        </div>
+
+        <!-- 큐 스냅샷 미리보기 -->
+        <div class="bg-[#060e20] p-2.5 rounded text-[11px] font-mono border border-cardBorder/70">
+          <span class="text-slate-400 block mb-1 text-[10px]">현재 FIFO Queue Front:</span>
+          <div id="bfs-queue-preview" class="text-slate-300 truncate">대기 중...</div>
+        </div>
+      </div>
+
+      <!-- DFS 미로 카드 -->
+      <div class="bg-cardDark border border-cardBorder rounded-xl p-5 flex flex-col gap-4 shadow-lg">
+        <div class="flex items-center justify-between border-b border-cardBorder pb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-amberAccent"></span>
+            <h2 class="font-bold text-sm text-white">깊이 우선 탐색 (DFS)</h2>
+            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-amberAccent/10 text-amberAccent">Stack (LIFO)</span>
+          </div>
+          <span id="dfs-status-badge" class="text-xs font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300">대기 중</span>
+        </div>
+
+        <!-- 미로 캔버스 -->
+        <div class="flex justify-center items-center bg-[#060e20] p-3 rounded-lg border border-cardBorder relative">
+          <canvas id="canvas-dfs" width="360" height="360" class="rounded"></canvas>
+          <div id="dfs-overlay-result" class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm rounded flex flex-col items-center justify-center gap-2 hidden">
+            <span class="material-symbols-outlined text-amberAccent text-4xl">flag</span>
+            <span class="text-white font-bold text-sm">경로 탐색 완료 (우회 가능)</span>
+            <span id="dfs-result-meta" class="text-xs text-slate-300 font-mono"></span>
+          </div>
+        </div>
+
+        <!-- DFS 실시간 메타데이터 & 스택 상태 -->
+        <div class="grid grid-cols-3 gap-2 text-xs font-mono">
+          <div class="bg-cardBorder/40 p-2.5 rounded border border-cardBorder">
+            <span class="text-slate-400 block text-[10px]">방문 노드 수 (Visited)</span>
+            <strong id="dfs-visited-val" class="text-amberAccent text-sm">0</strong>
+          </div>
+          <div class="bg-cardBorder/40 p-2.5 rounded border border-cardBorder">
+            <span class="text-slate-400 block text-[10px]">Stack 깊이 (Call Depth)</span>
+            <strong id="dfs-stack-val" class="text-roseAccent text-sm">0</strong>
+          </div>
+          <div class="bg-cardBorder/40 p-2.5 rounded border border-cardBorder">
+            <span class="text-slate-400 block text-[10px]">발견된 경로 길이</span>
+            <strong id="dfs-path-val" class="text-white text-sm">-</strong>
+          </div>
+        </div>
+
+        <!-- 스택 스냅샷 미리보기 -->
+        <div class="bg-[#060e20] p-2.5 rounded text-[11px] font-mono border border-cardBorder/70">
+          <span class="text-slate-400 block mb-1 text-[10px]">현재 LIFO Stack Top:</span>
+          <div id="dfs-stack-preview" class="text-slate-300 truncate">대기 중...</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 하단: 실시간 단계별 히스토그램 & 알고리즘 비교 매트릭스 -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      <!-- 1. 탐색 깊이별 노드 분포 히스토그램 -->
+      <div class="bg-cardDark border border-cardBorder rounded-xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <h3 class="font-bold text-xs text-slate-200 flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px] text-cyanAccent">bar_chart</span>
+            탐색 깊이(Level)별 히스토그램
+          </h3>
+          <span class="text-[10px] font-mono text-slate-400">BFS vs DFS</span>
+        </div>
+        <div class="h-44 w-full">
+          <canvas id="chart-depth-hist"></canvas>
+        </div>
+        <p class="text-[10px] text-slate-400 font-mono">
+          BFS는 특정 깊이에 다수의 노드가 모이는 종형 분포를, DFS는 좁고 깊게 퍼지는 분포를 형성합니다.
+        </p>
+      </div>
+
+      <!-- 2. Queue vs Stack 실시간 크기 추이 -->
+      <div class="bg-cardDark border border-cardBorder rounded-xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <h3 class="font-bold text-xs text-slate-200 flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px] text-emeraldAccent">trending_up</span>
+            Queue vs Stack 메모리 추이
+          </h3>
+          <span class="text-[10px] font-mono text-slate-400">Frontier Nodes</span>
+        </div>
+        <div class="h-44 w-full">
+          <canvas id="chart-frontier-trend"></canvas>
+        </div>
+        <p class="text-[10px] text-slate-400 font-mono">
+          BFS는 층별 탐색으로 큐 크기가 증가(O(V))하며, DFS는 경로 분기점만큼만 스택(O(H))을 점유합니다.
+        </p>
+      </div>
+
+      <!-- 3. 종합 알고리즘 비교 매트릭스 -->
+      <div class="bg-cardDark border border-cardBorder rounded-xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <h3 class="font-bold text-xs text-slate-200 flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px] text-amberAccent">compare_arrows</span>
+            작동 원리 및 복잡도 비교
+          </h3>
+          <span class="text-[10px] font-mono text-emeraldAccent">Summary</span>
+        </div>
+
+        <div class="overflow-x-auto text-xs font-mono">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b border-cardBorder text-[11px] text-slate-400">
+                <th class="py-1.5">항목</th>
+                <th class="py-1.5 text-cyanAccent">BFS (너비)</th>
+                <th class="py-1.5 text-amberAccent">DFS (깊이)</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-cardBorder/40 text-[11px] text-slate-300">
+              <tr>
+                <td class="py-1.5 text-slate-400">자료구조</td>
+                <td>Queue (FIFO)</td>
+                <td>Stack (LIFO)</td>
+              </tr>
+              <tr>
+                <td class="py-1.5 text-slate-400">최단 경로</td>
+                <td class="text-emeraldAccent font-semibold">100% 보장</td>
+                <td class="text-roseAccent">미보장 (우회)</td>
+              </tr>
+              <tr>
+                <td class="py-1.5 text-slate-400">시간 복잡도</td>
+                <td>O(V + E)</td>
+                <td>O(V + E)</td>
+              </tr>
+              <tr>
+                <td class="py-1.5 text-slate-400">공간 복잡도</td>
+                <td>O(V)</td>
+                <td>O(H) ~ O(V)</td>
+              </tr>
+              <tr>
+                <td class="py-1.5 text-slate-400">탐색 패턴</td>
+                <td>동심원 레벨별</td>
+                <td>막다른 길 백트래킹</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div id="comparison-analysis-box" class="bg-[#060e20] p-2.5 rounded text-[11px] text-slate-300 font-mono mt-auto border border-cardBorder">
+          시뮬레이션을 실행하면 두 알고리즘의 방문 노드 수와 경로 길이 비교 결과가 출력됩니다.
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- 프론트엔드 인터랙티브 시뮬레이터 스크립트 -->
+  <script>
+    let currentMaze = null;
+    let bfsResult = null;
+    let dfsResult = null;
+    let currentStep = 0;
+    let maxStep = 0;
+    let isPlaying = false;
+    let playInterval = null;
+    let playSpeed = 5;
+
+    let depthChart = null;
+    let frontierChart = null;
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      initCharts();
+      setupEventListeners();
+      await loadInitialBenchmark();
+    });
+
+    function setupEventListeners() {
+      document.getElementById('btn-play-pause').addEventListener('click', togglePlayPause);
+      document.getElementById('btn-step').addEventListener('click', stepForward);
+      document.getElementById('btn-reset').addEventListener('click', resetSimulation);
+      document.getElementById('btn-regenerate').addEventListener('click', async () => {
+        const size = parseInt(document.getElementById('sel-size').value, 10);
+        await requestGenerateMaze(size, size);
+      });
+      document.getElementById('sel-size').addEventListener('change', async (e) => {
+        const size = parseInt(e.target.value, 10);
+        await requestGenerateMaze(size, size);
+      });
+      document.getElementById('slider-speed').addEventListener('input', (e) => {
+        playSpeed = parseInt(e.target.value, 10);
+        document.getElementById('txt-speed').textContent = `${playSpeed}x`;
+        if (isPlaying) {
+          clearInterval(playInterval);
+          playInterval = setInterval(stepForward, Math.max(20, 300 / playSpeed));
+        }
+      });
     }
-  });
-</script></main></div></body></html>
+
+    // 1. 초기 벤치마크 데이터 로드 (google.script.run 지원)
+    async function loadInitialBenchmark() {
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        document.getElementById('txt-engine-status').textContent = 'GAS Backend: Connected';
+        google.script.run
+          .withSuccessHandler(function(data) {
+            applySimulationData(data.grid, data.start, data.goal, data.bfs, data.dfs);
+          })
+          .withFailureHandler(function(err) {
+            console.error('GAS 초기 로드 실패:', err);
+            fallbackLocalEngine(15, 15);
+          })
+          .getDefaultBenchmark();
+      } else {
+        document.getElementById('txt-engine-status').textContent = 'Client Engine: Active';
+        fallbackLocalEngine(15, 15);
+      }
+    }
+
+    // 2. 미로 새로 생성 요청 (google.script.run 지원)
+    async function requestGenerateMaze(rows, cols) {
+      resetSimulation();
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(function(genData) {
+            google.script.run
+              .withSuccessHandler(function(solveData) {
+                applySimulationData(genData.grid, genData.start, genData.goal, solveData.bfs, solveData.dfs);
+              })
+              .solveMaze(genData.grid, genData.start, genData.goal, 'both');
+          })
+          .generateMaze(rows, cols, 0.15);
+      } else {
+        fallbackLocalEngine(rows, cols);
+      }
+    }
+
+    // 클라이언트 사이드 미로 생성 및 탐색 Fallback
+    function fallbackLocalEngine(rows, cols) {
+      const rCount = rows % 2 === 1 ? rows : rows + 1;
+      const cCount = cols % 2 === 1 ? cols : cols + 1;
+      const grid = Array.from({ length: rCount }, () => Array(cCount).fill(1));
+      const start = [1, 1];
+      const goal = [rCount - 2, cCount - 2];
+
+      const stack = [[1, 1]];
+      grid[1][1] = 0;
+      const visited = new Set(['1,1']);
+      const dirs = [[-2, 0], [2, 0], [0, -2], [0, 2]];
+
+      while (stack.length > 0) {
+        const [cr, cc] = stack[stack.length - 1];
+        const neighbors = [];
+        for (const [dr, dc] of dirs) {
+          const nr = cr + dr;
+          const nc = cc + dc;
+          if (nr >= 1 && nr < rCount - 1 && nc >= 1 && nc < cCount - 1) {
+            if (!visited.has(`${nr},${nc}`)) neighbors.push([dr, dc, nr, nc]);
+          }
+        }
+        if (neighbors.length > 0) {
+          const [dr, dc, nr, nc] = neighbors[Math.floor(Math.random() * neighbors.length)];
+          grid[cr + dr / 2][cc + dc / 2] = 0;
+          grid[nr][nc] = 0;
+          visited.add(`${nr},${nc}`);
+          stack.push([nr, nc]);
+        } else {
+          stack.pop();
+        }
+      }
+
+      // 루프 약간 허물기
+      for (let r = 2; r < rCount - 2; r++) {
+        for (let c = 2; c < cCount - 2; c++) {
+          if (grid[r][c] === 1 && Math.random() < 0.15) {
+            if ((grid[r-1][c] === 0 && grid[r+1][c] === 0) || (grid[r][c-1] === 0 && grid[r][c+1] === 0)) {
+              grid[r][c] = 0;
+            }
+          }
+        }
+      }
+      grid[start[0]][start[1]] = 0;
+      grid[goal[0]][goal[1]] = 0;
+
+      const bfs = localBfs(grid, start, goal);
+      const dfs = localDfs(grid, start, goal);
+      applySimulationData(grid, start, goal, bfs, dfs);
+    }
+
+    function localBfs(grid, start, goal) {
+      const rows = grid.length;
+      const cols = grid[0].length;
+      const queue = [start];
+      const visited = new Set([`${start[0]},${start[1]}`]);
+      const parent = {};
+      const depth = { [`${start[0]},${start[1]}`]: 0 };
+      const steps = [];
+      const visitedList = [start];
+      let found = false;
+
+      while (queue.length > 0) {
+        const curr = queue.shift();
+        const [cr, cc] = curr;
+        const curD = depth[`${cr},${cc}`];
+
+        if (cr === goal[0] && cc === goal[1]) {
+          found = true;
+          steps.push({
+            current: curr,
+            frontier: [...queue],
+            visited: [...visitedList],
+            visited_count: visitedList.length,
+            frontier_count: queue.length,
+            path_found: true,
+            histogram: { depth_distribution: buildDepthHist(depth) }
+          });
+          break;
+        }
+
+        for (const [dr, dc] of [[-1, 0], [0, 1], [1, 0], [0, -1]]) {
+          const nr = cr + dr;
+          const nc = cc + dc;
+          if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && grid[nr][nc] === 0) {
+            const key = `${nr},${nc}`;
+            if (!visited.has(key)) {
+              visited.add(key);
+              parent[key] = curr;
+              depth[key] = curD + 1;
+              queue.push([nr, nc]);
+              visitedList.push([nr, nc]);
+            }
+          }
+        }
+
+        steps.push({
+          current: curr,
+          frontier: [...queue],
+          visited: [...visitedList],
+          visited_count: visitedList.length,
+          frontier_count: queue.length,
+          path_found: false,
+          histogram: { depth_distribution: buildDepthHist(depth) }
+        });
+      }
+
+      const path = [];
+      if (found) {
+        let cur = goal;
+        while (cur[0] !== start[0] || cur[1] !== start[1]) {
+          path.push(cur);
+          cur = parent[`${cur[0]},${cur[1]}`];
+        }
+        path.push(start);
+        path.reverse();
+      }
+
+      return {
+        pathFound: found,
+        finalPath: path,
+        pathLength: path.length,
+        totalVisited: visitedList.length,
+        steps: steps
+      };
+    }
+
+    function localDfs(grid, start, goal) {
+      const rows = grid.length;
+      const cols = grid[0].length;
+      const stack = [[start[0], start[1], 0]];
+      const visited = new Set([`${start[0]},${start[1]}`]);
+      const parent = {};
+      const depth = { [`${start[0]},${start[1]}`]: 0 };
+      const steps = [];
+      const visitedList = [start];
+      let found = false;
+
+      while (stack.length > 0) {
+        const [cr, cc, curD] = stack.pop();
+
+        if (cr === goal[0] && cc === goal[1]) {
+          found = true;
+          steps.push({
+            current: [cr, cc],
+            frontier: stack.map(it => [it[0], it[1]]),
+            visited: [...visitedList],
+            visited_count: visitedList.length,
+            frontier_count: stack.length,
+            path_found: true,
+            histogram: { depth_distribution: buildDepthHist(depth) }
+          });
+          break;
+        }
+
+        for (const [dr, dc] of [[0, -1], [1, 0], [0, 1], [-1, 0]]) {
+          const nr = cr + dr;
+          const nc = cc + dc;
+          if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && grid[nr][nc] === 0) {
+            const key = `${nr},${nc}`;
+            if (!visited.has(key)) {
+              visited.add(key);
+              parent[key] = [cr, cc];
+              depth[key] = curD + 1;
+              stack.push([nr, nc, curD + 1]);
+              visitedList.push([nr, nc]);
+            }
+          }
+        }
+
+        steps.push({
+          current: [cr, cc],
+          frontier: stack.map(it => [it[0], it[1]]),
+          visited: [...visitedList],
+          visited_count: visitedList.length,
+          frontier_count: stack.length,
+          path_found: false,
+          histogram: { depth_distribution: buildDepthHist(depth) }
+        });
+      }
+
+      const path = [];
+      if (found) {
+        let cur = goal;
+        while (cur[0] !== start[0] || cur[1] !== start[1]) {
+          path.push(cur);
+          cur = parent[`${cur[0]},${cur[1]}`];
+        }
+        path.push(start);
+        path.reverse();
+      }
+
+      return {
+        pathFound: found,
+        finalPath: path,
+        pathLength: path.length,
+        totalVisited: visitedList.length,
+        steps: steps
+      };
+    }
+
+    function buildDepthHist(depthMap) {
+      const counts = {};
+      for (const k in depthMap) {
+        const d = depthMap[k];
+        const bin = Math.floor(d / 3) * 3;
+        const label = `${bin}~${bin + 2}`;
+        counts[label] = (counts[label] || 0) + 1;
+      }
+      return counts;
+    }
+
+    function applySimulationData(grid, start, goal, bfs, dfs) {
+      currentMaze = { grid, start, goal, rows: grid.length, cols: grid[0].length };
+      bfsResult = bfs;
+      dfsResult = dfs;
+      maxStep = Math.max(bfs.steps.length, dfs.steps.length);
+      currentStep = 0;
+
+      const pathDiff = dfs.pathLength - bfs.pathLength;
+      const visitDiff = dfs.totalVisited - bfs.totalVisited;
+      document.getElementById('comparison-analysis-box').innerHTML = 
+        `💡 <strong>비교 결과:</strong><br/>` +
+        `• BFS 최단경로 길이: <strong class="text-cyanAccent">${bfs.pathLength}</strong> (방문: ${bfs.totalVisited}개)<br/>` +
+        `• DFS 탐색경로 길이: <strong class="text-amberAccent">${dfs.pathLength}</strong> (방문: ${dfs.totalVisited}개)<br/>` +
+        `• 차이: DFS가 <strong>${Math.abs(pathDiff)}보</strong> ` + (pathDiff >= 0 ? '더 우회함' : '더 짧음') + 
+        `, 노드는 <strong>${Math.abs(visitDiff)}개</strong> ` + (visitDiff >= 0 ? '더 많이 탐색함' : '더 적게 탐색함');
+
+      renderStep(0);
+    }
+
+    function togglePlayPause() {
+      if (isPlaying) {
+        pauseSimulation();
+      } else {
+        playSimulation();
+      }
+    }
+
+    function playSimulation() {
+      if (currentStep >= maxStep) currentStep = 0;
+      isPlaying = true;
+      document.getElementById('txt-play-pause').textContent = '일시 정지';
+      document.getElementById('btn-play-pause').classList.replace('bg-cyanAccent', 'bg-roseAccent');
+      playInterval = setInterval(stepForward, Math.max(20, 300 / playSpeed));
+    }
+
+    function pauseSimulation() {
+      isPlaying = false;
+      clearInterval(playInterval);
+      document.getElementById('txt-play-pause').textContent = '동시 실행';
+      document.getElementById('btn-play-pause').classList.replace('bg-roseAccent', 'bg-cyanAccent');
+    }
+
+    function stepForward() {
+      if (currentStep < maxStep - 1) {
+        currentStep++;
+        renderStep(currentStep);
+      } else {
+        pauseSimulation();
+      }
+    }
+
+    function resetSimulation() {
+      pauseSimulation();
+      currentStep = 0;
+      renderStep(0);
+    }
+
+    function renderStep(step) {
+      document.getElementById('txt-step-counter').textContent = step;
+
+      const bfsStep = bfsResult ? bfsResult.steps[Math.min(step, bfsResult.steps.length - 1)] : null;
+      const dfsStep = dfsResult ? dfsResult.steps[Math.min(step, dfsResult.steps.length - 1)] : null;
+
+      if (currentMaze) {
+        drawMaze('canvas-bfs', currentMaze, bfsStep, bfsResult ? bfsResult.finalPath : [], '#38bdf8', '#0284c7');
+        drawMaze('canvas-dfs', currentMaze, dfsStep, dfsResult ? dfsResult.finalPath : [], '#ffc174', '#d97706');
+      }
+
+      if (bfsStep) {
+        document.getElementById('bfs-visited-val').textContent = bfsStep.visited_count;
+        document.getElementById('bfs-queue-val').textContent = bfsStep.frontier_count;
+        document.getElementById('bfs-queue-preview').textContent = 
+          bfsStep.frontier && bfsStep.frontier.length > 0 
+            ? bfsStep.frontier.slice(0, 5).map(p => `[${p[0]},${p[1]}]`).join(' → ') 
+            : '(Queue 비어있음)';
+        if (bfsStep.path_found) {
+          document.getElementById('bfs-path-val').textContent = bfsResult.pathLength;
+          document.getElementById('bfs-status-badge').textContent = '도착 완료 (최단)';
+          document.getElementById('bfs-status-badge').className = 'text-xs font-mono px-2 py-0.5 rounded bg-cyanAccent/20 text-cyanAccent';
+          document.getElementById('bfs-overlay-result').classList.remove('hidden');
+          document.getElementById('bfs-result-meta').textContent = `최단 경로 길이: ${bfsResult.pathLength} | 탐색 스텝: ${step}`;
+        } else {
+          document.getElementById('bfs-path-val').textContent = '-';
+          document.getElementById('bfs-status-badge').textContent = '탐색 중...';
+          document.getElementById('bfs-status-badge').className = 'text-xs font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300';
+          document.getElementById('bfs-overlay-result').classList.add('hidden');
+        }
+      }
+
+      if (dfsStep) {
+        document.getElementById('dfs-visited-val').textContent = dfsStep.visited_count;
+        document.getElementById('dfs-stack-val').textContent = dfsStep.frontier_count;
+        document.getElementById('dfs-stack-preview').textContent = 
+          dfsStep.frontier && dfsStep.frontier.length > 0 
+            ? dfsStep.frontier.slice(-5).map(p => `[${p[0]},${p[1]}]`).join(' ← Top ') 
+            : '(Stack 비어있음)';
+        if (dfsStep.path_found) {
+          document.getElementById('dfs-path-val').textContent = dfsResult.pathLength;
+          document.getElementById('dfs-status-badge').textContent = '도착 완료';
+          document.getElementById('dfs-status-badge').className = 'text-xs font-mono px-2 py-0.5 rounded bg-amberAccent/20 text-amberAccent';
+          document.getElementById('dfs-overlay-result').classList.remove('hidden');
+          document.getElementById('dfs-result-meta').textContent = `발견 경로 길이: ${dfsResult.pathLength} | 탐색 스텝: ${step}`;
+        } else {
+          document.getElementById('dfs-path-val').textContent = '-';
+          document.getElementById('dfs-status-badge').textContent = '탐색 중...';
+          document.getElementById('dfs-status-badge').className = 'text-xs font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300';
+          document.getElementById('dfs-overlay-result').classList.add('hidden');
+        }
+      }
+
+      updateCharts(bfsStep, dfsStep);
+    }
+
+    function drawMaze(canvasId, maze, stepData, finalPath, activeColor, visitedColor) {
+      const canvas = document.getElementById(canvasId);
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const rows = maze.rows;
+      const cols = maze.cols;
+      const cellW = canvas.width / cols;
+      const cellH = canvas.height / rows;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          if (maze.grid[r][c] === 1) {
+            ctx.fillStyle = '#1e293b';
+          } else {
+            ctx.fillStyle = '#0f172a';
+          }
+          ctx.fillRect(c * cellW, r * cellH, cellW, cellH);
+          ctx.strokeStyle = '#060e20';
+          ctx.lineWidth = 0.5;
+          ctx.strokeRect(c * cellW, r * cellH, cellW, cellH);
+        }
+      }
+
+      if (stepData && stepData.visited) {
+        ctx.fillStyle = visitedColor;
+        ctx.globalAlpha = 0.65;
+        for (const [vr, vc] of stepData.visited) {
+          ctx.fillRect(vc * cellW, vr * cellH, cellW, cellH);
+        }
+        ctx.globalAlpha = 1.0;
+      }
+
+      if (stepData && stepData.frontier) {
+        ctx.fillStyle = activeColor;
+        for (const [fr, fc] of stepData.frontier) {
+          ctx.fillRect(fc * cellW + cellW * 0.15, fr * cellH + cellH * 0.15, cellW * 0.7, cellH * 0.7);
+        }
+      }
+
+      if (stepData && stepData.path_found && finalPath && finalPath.length > 0) {
+        ctx.strokeStyle = '#4edea3';
+        ctx.lineWidth = Math.max(3, cellW * 0.4);
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.beginPath();
+        for (let i = 0; i < finalPath.length; i++) {
+          const [pr, pc] = finalPath[i];
+          const px = pc * cellW + cellW / 2;
+          const py = pr * cellH + cellH / 2;
+          if (i === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.stroke();
+      }
+
+      if (stepData && stepData.current) {
+        const [cr, cc] = stepData.current;
+        ctx.fillStyle = '#f43f5e';
+        ctx.beginPath();
+        ctx.arc(cc * cellW + cellW / 2, cr * cellH + cellH / 2, Math.min(cellW, cellH) * 0.35, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      drawMarker(ctx, maze.start[1] * cellW + cellW / 2, maze.start[0] * cellH + cellH / 2, '#4edea3', 'S', cellW);
+      drawMarker(ctx, maze.goal[1] * cellW + cellW / 2, maze.goal[0] * cellH + cellH / 2, '#f59e0b', 'G', cellW);
+    }
+
+    function drawMarker(ctx, x, y, color, label, size) {
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(x, y, size * 0.35, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#060e20';
+      ctx.font = `bold ${Math.max(9, size * 0.4)}px Inter, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(label, x, y);
+    }
+
+    function initCharts() {
+      const ctxDepth = document.getElementById('chart-depth-hist').getContext('2d');
+      depthChart = new Chart(ctxDepth, {
+        type: 'bar',
+        data: {
+          labels: ['0~2', '3~5', '6~8', '9~11', '12~14', '15+'],
+          datasets: [
+            { label: 'BFS (너비)', data: [1, 4, 8, 12, 10, 5], backgroundColor: 'rgba(56, 189, 248, 0.7)' },
+            { label: 'DFS (깊이)', data: [1, 2, 3, 2, 4, 8], backgroundColor: 'rgba(255, 193, 116, 0.7)' }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { ticks: { color: '#87929a', font: { size: 9, family: 'JetBrains Mono' } }, grid: { display: false } },
+            y: { ticks: { color: '#87929a', font: { size: 9, family: 'JetBrains Mono' } }, grid: { color: '#171f33' } }
+          },
+          plugins: {
+            legend: { labels: { color: '#dae2fd', font: { size: 10, family: 'Inter' } } }
+          }
+        }
+      });
+
+      const ctxFrontier = document.getElementById('chart-frontier-trend').getContext('2d');
+      frontierChart = new Chart(ctxFrontier, {
+        type: 'line',
+        data: {
+          labels: Array.from({ length: 15 }, (_, i) => `${i * 2}`),
+          datasets: [
+            { label: 'Queue 크기 (BFS)', data: [1, 3, 6, 8, 10, 8, 6, 4, 2], borderColor: '#38bdf8', tension: 0.3, fill: false },
+            { label: 'Stack 크기 (DFS)', data: [1, 2, 4, 5, 4, 7, 6, 8, 9], borderColor: '#ffc174', tension: 0.3, fill: false }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { ticks: { color: '#87929a', font: { size: 9, family: 'JetBrains Mono' } }, grid: { display: false } },
+            y: { ticks: { color: '#87929a', font: { size: 9, family: 'JetBrains Mono' } }, grid: { color: '#171f33' } }
+          },
+          plugins: {
+            legend: { labels: { color: '#dae2fd', font: { size: 10, family: 'Inter' } } }
+          }
+        }
+      });
+    }
+
+    function updateCharts(bfsStep, dfsStep) {
+      if (!depthChart || !frontierChart) return;
+
+      if (bfsStep && dfsStep && bfsStep.histogram && dfsStep.histogram) {
+        const bfsHist = bfsStep.histogram.depth_distribution || {};
+        const dfsHist = dfsStep.histogram.depth_distribution || {};
+
+        const allKeys = Array.from(new Set([...Object.keys(bfsHist), ...Object.keys(dfsHist)])).sort((a, b) => {
+          return parseInt(a) - parseInt(b);
+        });
+
+        depthChart.data.labels = allKeys.slice(0, 8);
+        depthChart.data.datasets[0].data = allKeys.slice(0, 8).map(k => bfsHist[k] || 0);
+        depthChart.data.datasets[1].data = allKeys.slice(0, 8).map(k => dfsHist[k] || 0);
+        depthChart.update('none');
+
+        if (frontierChart.data.labels.length > 25) {
+          frontierChart.data.labels.shift();
+          frontierChart.data.datasets[0].data.shift();
+          frontierChart.data.datasets[1].data.shift();
+        }
+        frontierChart.data.labels.push(`${currentStep}`);
+        frontierChart.data.datasets[0].data.push(bfsStep.frontier_count || 0);
+        frontierChart.data.datasets[1].data.push(dfsStep.frontier_count || 0);
+        frontierChart.update('none');
+      }
+    }
+  </script>
+</body>
+</html>
