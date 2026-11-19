@@ -1,0 +1,14 @@
+node_modules
+.next
+.git
+.github
+fashion_server_app
+bub
+bubble 
+midterm 
+gas_deploy
+stitch_design
+tests
+*.md
+.env*
+!.env.example
