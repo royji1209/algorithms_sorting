@@ -3,7 +3,7 @@ import type {
   EmotionValence,
   LetterDelivery,
   PoemPost,
-} from "../types/domain.ts";
+} from "@/types/domain";
 
 export interface DayThemeMeta {
   dayOfWeek: number;

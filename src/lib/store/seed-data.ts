@@ -1,4 +1,4 @@
-import type { EmpathyComment, PoemPost } from "../types/domain.ts";
+import type { EmpathyComment, PoemPost } from "@/types/domain";
 
 /**
  * 초기 시드 데이터 및 로컬/서버 상태 저장소

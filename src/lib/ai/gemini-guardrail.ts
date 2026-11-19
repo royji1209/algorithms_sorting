@@ -2,7 +2,7 @@ import type {
   EmotionCheckinResult,
   EmotionValence,
   PoemMoodValence,
-} from "../types/domain.ts";
+} from "@/types/domain";
 
 /**
  * PRD 필수 지정 도메인 가드레일 안내 문구
