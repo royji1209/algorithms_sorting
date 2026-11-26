@@ -56,16 +56,27 @@
       </div>
     </div>
 
-    <!-- 연결 상태 및 복잡도 인디케이터 -->
-    <div class="flex items-center gap-4 text-xs font-mono">
-      <div class="flex items-center gap-2 bg-cardDark px-3 py-1.5 rounded-full border border-cardBorder">
-        <span class="relative flex h-2 w-2">
-          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emeraldAccent opacity-75"></span>
-          <span class="relative inline-flex rounded-full h-2 w-2 bg-emeraldAccent"></span>
-        </span>
-        <span id="txt-engine-status" class="text-slate-300">GAS Backend: Active</span>
+    <!-- 연결 상태 및 복잡도 인디케이터 & Python 서버 연결 제어 -->
+    <div class="flex flex-wrap items-center gap-3 text-xs font-mono">
+      <!-- Python 서버 연결하기 / 연결끊기 버튼 -->
+      <div class="flex items-center gap-1.5 bg-cardDark/80 p-1 rounded-lg border border-cardBorder">
+        <button id="btn-connect" onclick="handleConnect()" class="px-2.5 py-1 rounded bg-emerald-600/90 hover:bg-emerald-500 text-white font-medium text-[11px] transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+          연결하기
+        </button>
+        <button id="btn-disconnect" onclick="handleDisconnect()" class="px-2.5 py-1 rounded bg-rose-600/90 hover:bg-rose-500 text-white font-medium text-[11px] transition-all disabled:opacity-40 disabled:cursor-not-allowed" disabled>
+          연결끊기
+        </button>
       </div>
-      <div class="hidden md:flex items-center gap-2 text-slate-400">
+
+      <div class="flex items-center gap-2 bg-cardDark px-3 py-1.5 rounded-full border border-cardBorder">
+        <span id="conn-ping-dot" class="relative flex h-2 w-2">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-slate-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-slate-400"></span>
+        </span>
+        <span id="conn-status" class="text-slate-300">연결 확인 중...</span>
+      </div>
+
+      <div class="hidden lg:flex items-center gap-2 text-slate-400">
         <span>시간복잡도: <strong class="text-cyanAccent">O(V + E)</strong></span>
       </div>
     </div>
@@ -331,8 +342,92 @@
     window.addEventListener('DOMContentLoaded', async () => {
       initCharts();
       setupEventListeners();
-      await loadInitialBenchmark();
+      renderEmptyCanvases();
+      handleConnect();
     });
+
+    // 0. Python 백엔드 서버 연결 제어 (gas-python-startup-link 스킬 적용)
+    function updateConnectionUI(res) {
+      const isConn = res && res.connected;
+      const btnConnect = document.getElementById('btn-connect');
+      const btnDisconnect = document.getElementById('btn-disconnect');
+      const connStatus = document.getElementById('conn-status');
+      const pingDot = document.getElementById('conn-ping-dot');
+
+      btnConnect.disabled = !!isConn;
+      btnDisconnect.disabled = !isConn;
+
+      if (isConn) {
+        connStatus.textContent = `연결됨 (${res.latencyMs || 0}ms)`;
+        connStatus.className = 'text-emerald-400 font-medium';
+        pingDot.innerHTML = `
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emeraldAccent opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-emeraldAccent"></span>
+        `;
+      } else {
+        const msg = (res && res.message) ? res.message : '연결 끊김';
+        connStatus.textContent = msg;
+        connStatus.className = 'text-rose-400 font-medium';
+        pingDot.innerHTML = `
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+        `;
+      }
+    }
+
+    function handleConnect() {
+      const connStatus = document.getElementById('conn-status');
+      connStatus.textContent = '서버 연결 시도 중...';
+      connStatus.className = 'text-cyan-300';
+      
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(updateConnectionUI)
+          .withFailureHandler(function(err) {
+            updateConnectionUI({ connected: false, message: (err && err.message) || '연결 실패' });
+          })
+          .connectPythonServer();
+      } else {
+        // GAS 환경 외부(로컬 브라우저)일 때 헬스체크 직접 시도
+        fetch('http://localhost:8080/health')
+          .then(res => res.json())
+          .then(data => {
+            updateConnectionUI({ connected: true, latencyMs: 10, message: 'Local Python 서버 연결됨' });
+          })
+          .catch(() => {
+            updateConnectionUI({ connected: false, message: 'Python 서버 미연결 (로컬)' });
+          });
+      }
+    }
+
+    function handleDisconnect() {
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(updateConnectionUI)
+          .disconnectPythonServer();
+      } else {
+        updateConnectionUI({ connected: false, message: 'Python 서버 연결이 끊어졌습니다.' });
+      }
+    }
+
+    // 초기 빈 캔버스 렌더링 (gas-empty-initial-state 스킬 준수)
+    function renderEmptyCanvases() {
+      ['canvas-bfs', 'canvas-dfs'].forEach(canvasId => {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // 빈 상태 안내 문구
+        ctx.fillStyle = '#64748b';
+        ctx.font = '12px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('미로를 생성하거나 탐색을 실행하면', canvas.width / 2, canvas.height / 2 - 10);
+        ctx.fillText('결과가 표시됩니다.', canvas.width / 2, canvas.height / 2 + 10);
+      });
+    }
 
     function setupEventListeners() {
       document.getElementById('btn-play-pause').addEventListener('click', togglePlayPause);
@@ -356,23 +451,10 @@
       });
     }
 
-    // 1. 초기 벤치마크 데이터 로드 (google.script.run 지원)
+    // 1. 초기 벤치마크 데이터 로드 (gas-empty-initial-state 스킬 준수: 초기에는 자동 실행하지 않음)
     async function loadInitialBenchmark() {
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        document.getElementById('txt-engine-status').textContent = 'GAS Backend: Connected';
-        google.script.run
-          .withSuccessHandler(function(data) {
-            applySimulationData(data.grid, data.start, data.goal, data.bfs, data.dfs);
-          })
-          .withFailureHandler(function(err) {
-            console.error('GAS 초기 로드 실패:', err);
-            fallbackLocalEngine(15, 15);
-          })
-          .getDefaultBenchmark();
-      } else {
-        document.getElementById('txt-engine-status').textContent = 'Client Engine: Active';
-        fallbackLocalEngine(15, 15);
-      }
+      // 빈 상태 유지: 자동 생성 또는 자동 탐색 호출 제거
+      renderEmptyCanvases();
     }
 
     // 2. 미로 새로 생성 요청 (google.script.run 지원)
@@ -625,7 +707,11 @@
       renderStep(0);
     }
 
-    function togglePlayPause() {
+    async function togglePlayPause() {
+      if (!currentMaze || !bfsResult || !dfsResult) {
+        const size = parseInt(document.getElementById('sel-size').value, 10);
+        await requestGenerateMaze(size, size);
+      }
       if (isPlaying) {
         pauseSimulation();
       } else {
@@ -805,10 +891,10 @@
       depthChart = new Chart(ctxDepth, {
         type: 'bar',
         data: {
-          labels: ['0~2', '3~5', '6~8', '9~11', '12~14', '15+'],
+          labels: [],
           datasets: [
-            { label: 'BFS (너비)', data: [1, 4, 8, 12, 10, 5], backgroundColor: 'rgba(56, 189, 248, 0.7)' },
-            { label: 'DFS (깊이)', data: [1, 2, 3, 2, 4, 8], backgroundColor: 'rgba(255, 193, 116, 0.7)' }
+            { label: 'BFS (너비)', data: [], backgroundColor: 'rgba(56, 189, 248, 0.7)' },
+            { label: 'DFS (깊이)', data: [], backgroundColor: 'rgba(255, 193, 116, 0.7)' }
           ]
         },
         options: {
@@ -828,10 +914,10 @@
       frontierChart = new Chart(ctxFrontier, {
         type: 'line',
         data: {
-          labels: Array.from({ length: 15 }, (_, i) => `${i * 2}`),
+          labels: [],
           datasets: [
-            { label: 'Queue 크기 (BFS)', data: [1, 3, 6, 8, 10, 8, 6, 4, 2], borderColor: '#38bdf8', tension: 0.3, fill: false },
-            { label: 'Stack 크기 (DFS)', data: [1, 2, 4, 5, 4, 7, 6, 8, 9], borderColor: '#ffc174', tension: 0.3, fill: false }
+            { label: 'Queue 크기 (BFS)', data: [], borderColor: '#38bdf8', tension: 0.3, fill: false },
+            { label: 'Stack 크기 (DFS)', data: [], borderColor: '#ffc174', tension: 0.3, fill: false }
           ]
         },
         options: {

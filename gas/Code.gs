@@ -7,6 +7,63 @@
  */
 
 /**
+ * 0. Python 백엔드 서버 URL 및 연결 제어 (gas-python-startup-link 스킬 적용)
+ */
+function getPythonServerUrl_() {
+  const url = PropertiesService.getScriptProperties().getProperty('PYTHON_SERVER_URL');
+  return url ? url.trim() : '';
+}
+
+function connectPythonServer() {
+  const baseUrl = getPythonServerUrl_();
+  const startedAt = Date.now();
+
+  if (!baseUrl) {
+    return {
+      connected: false,
+      status: 'unconfigured',
+      message: 'PYTHON_SERVER_URL 스크립트 속성이 설정되지 않았습니다.',
+      latencyMs: 0
+    };
+  }
+
+  try {
+    const endpoint = baseUrl.replace(/\/+$/, '') + '/health';
+    const res = UrlFetchApp.fetch(endpoint, {
+      method: 'get',
+      muteHttpExceptions: true,
+      followRedirects: true
+    });
+    const code = res.getResponseCode();
+    const latencyMs = Date.now() - startedAt;
+
+    return {
+      connected: code >= 200 && code < 300,
+      status: code >= 200 && code < 300 ? 'connected' : 'error',
+      httpStatus: code,
+      message: code >= 200 && code < 300 ? 'Python 서버 연결됨' : ('응답 코드 ' + code),
+      latencyMs: latencyMs
+    };
+  } catch (err) {
+    return {
+      connected: false,
+      status: 'unreachable',
+      message: err && err.message ? err.message : 'Python 서버 연결 실패',
+      latencyMs: Date.now() - startedAt
+    };
+  }
+}
+
+function disconnectPythonServer() {
+  return {
+    connected: false,
+    status: 'disconnected',
+    message: 'Python 서버 연결이 끊어졌습니다.',
+    latencyMs: 0
+  };
+}
+
+/**
  * 1. 웹앱 진입점 (doGet)
  */
 function doGet(e) {
@@ -600,19 +657,20 @@ function buildDepthHist(depthMap) {
 }
 
 /**
- * 4. 초기 렌더링용 기본 15x15 벤치마크 데이터
+ * 4. 초기 렌더링용 빈 상태 (Empty State) 기본 구조
+ * (gas-empty-initial-state 스킬 준수: 초기 더미/샘플/목업 미로 데이터를 반환하지 않음)
  */
 function getDefaultBenchmark() {
-  var maze = generateMaze(15, 15, 0.15);
-  var solved = solveMaze(maze.grid, maze.start, maze.goal, "both");
   return {
-    rows: maze.rows,
-    cols: maze.cols,
-    grid: maze.grid,
-    start: maze.start,
-    goal: maze.goal,
-    bfs: solved.bfs,
-    dfs: solved.dfs,
-    comparison: solved.comparison
+    rows: 15,
+    cols: 15,
+    grid: [],
+    start: [1, 1],
+    goal: [13, 13],
+    bfs: null,
+    dfs: null,
+    comparison: null,
+    empty: true,
+    message: "미로를 생성하거나 탐색을 실행하면 결과가 표시됩니다."
   };
 }

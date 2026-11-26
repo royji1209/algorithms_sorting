@@ -16,7 +16,11 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "*",
+        "https://script.google.com",
+        "https://script.googleusercontent.com",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -509,7 +513,11 @@ def calculate_depth_hist(depth_map: Dict[Tuple[int, int], int], max_bins: int = 
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "service": "AlgoMaze Lab BFS vs DFS Visualizer API"}
+    return {
+        "status": "ok",
+        "message": "Python backend active",
+        "service": "AlgoMaze Lab BFS vs DFS Visualizer API"
+    }
 
 @app.post("/api/maze/generate")
 def generate_maze(req: MazeGenerateRequest):
@@ -600,3 +608,8 @@ app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 @app.get("/", response_class=HTMLResponse)
 def index():
     return FileResponse(str(INDEX_FILE))
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=8080, reload=True)
